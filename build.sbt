@@ -7,7 +7,6 @@ inThisBuild(
     resolvers += "jitpack" at "https://jitpack.io",
     scalafmtOnCompile := true,
     publishMavenStyle := true,
-    sbtPlugin := true,
     scalacOptions ++= Seq(
       "-encoding",
       "UTF-8",
@@ -36,5 +35,6 @@ lazy val `scalajs-selenium-snowpack` = project
     ),
     scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
     scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(a => Seq("-Xmx", "-Xms", "-XX", "-Dsbt.log.noformat").exists(a.startsWith)),
-    scriptedBufferLog := false
+    scriptedBufferLog := false,
+    sbtPlugin := true
   )
