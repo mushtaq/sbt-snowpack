@@ -1,5 +1,3 @@
-import scala.xml.Elem
-
 inThisBuild(
   Seq(
     scalaVersion := "2.12.12",
@@ -41,14 +39,12 @@ lazy val `scalajs-selenium-snowpack` = project
     publishMavenStyle := true,
     publishM2 := {
       publishM2.value
-
-      val d = file(
-        sys.env("HOME")
-      ) / s".m2/repository/com/github/mushtaq/scalajs-selenium-snowpack/scalajs-selenium-snowpack_${scalaBinaryVersion.value}_${sbtBinaryVersion.value}"
-      d.renameTo(
-        file(
-          sys.env("HOME")
-        ) / s".m2/repository/com/github/mushtaq/scalajs-selenium-snowpack/scalajs-selenium-snowpack"
-      )
+      val orgPath          = organization.value.replace(".", "/")
+      val basePath         = s".m2/repository/$orgPath/${name.value}"
+      val originalLocation = file(sys.env("HOME")) / s"${basePath}_${scalaBinaryVersion.value}_${sbtBinaryVersion.value}"
+      val newLocation      = file(sys.env("HOME")) / s"$basePath"
+      println(s"originalLocation ----------> $originalLocation")
+      println(s"newLocation      ----------> $newLocation")
+      originalLocation.renameTo(newLocation)
     }
   )
