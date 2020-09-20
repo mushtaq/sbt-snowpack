@@ -48,7 +48,7 @@ lazy val `scalajs-selenium-snowpack` = project
       d.renameTo(
         file(
           sys.env("HOME")
-        ) / s".m2/repository/com/github/mushtaq/scalajs-selenium-snowpack/scalajs-selenium-snowpack"
+        ) / s".m2/repository/com/github/mushtaq/scalajs-selenium-snowpack/scalajs-selenium-snowpack_${scalaBinaryVersion.value}"
       )
     }
   )
