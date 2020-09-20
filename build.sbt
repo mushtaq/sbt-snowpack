@@ -48,3 +48,4 @@ lazy val `scalajs-selenium-snowpack` = project
       originalLocation.renameTo(newLocation)
     }
   )
+
