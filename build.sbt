@@ -36,16 +36,5 @@ lazy val `scalajs-selenium-snowpack` = project
     scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(a => Seq("-Xmx", "-Xms", "-XX", "-Dsbt.log.noformat").exists(a.startsWith)),
     scriptedBufferLog := false,
     sbtPlugin := true,
-    publishMavenStyle := true,
-    publishM2 := {
-      publishM2.value
-      val orgPath          = organization.value.replace(".", "/")
-      val basePath         = s".m2/repository/$orgPath/${name.value}"
-      val originalLocation = file(sys.env("HOME")) / s"${basePath}_${scalaBinaryVersion.value}_${sbtBinaryVersion.value}"
-      val newLocation      = file(sys.env("HOME")) / s"$basePath"
-      println(s"originalLocation ----------> $originalLocation")
-      println(s"newLocation      ----------> $newLocation")
-      originalLocation.renameTo(newLocation)
-    }
+    publishMavenStyle := true
   )
-
