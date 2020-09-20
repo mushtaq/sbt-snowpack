@@ -42,7 +42,7 @@ lazy val `scalajs-selenium-snowpack` = project
       val orgPath          = organization.value.replace(".", "/")
       val basePath         = s".m2/repository/$orgPath/${name.value}"
       val originalLocation = file(sys.env("HOME")) / s"${basePath}_${scalaBinaryVersion.value}_${sbtBinaryVersion.value}"
-      val newLocation      = file(sys.env("HOME")) / s"${basePath}_${scalaBinaryVersion.value}"
+      val newLocation      = file(sys.env("HOME")) / s"$basePath"
       println(s"originalLocation ----------> $originalLocation")
       println(s"newLocation      ----------> $newLocation")
       originalLocation.renameTo(newLocation)
