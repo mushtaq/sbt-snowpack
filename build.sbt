@@ -1,3 +1,5 @@
+import scala.xml.Elem
+
 inThisBuild(
   Seq(
     scalaVersion := "2.12.12",
@@ -37,6 +39,18 @@ lazy val `scalajs-selenium-snowpack` = project
     scriptedBufferLog := false,
     sbtPlugin := true,
     publishMavenStyle := true,
+    pomPostProcess := { input =>
+      val newArtifactId = <artifactId>{name.value}_{scalaBinaryVersion.value}</artifactId>
+      input match {
+        case elem: Elem =>
+          val updatedChild = input.child.map {
+            case elem: Elem if elem.label == "artifactId" => newArtifactId
+            case x                                        => x
+          }
+          elem.copy(child = updatedChild)
+        case x          => x
+      }
+    },
     publishM2 := {
       publishM2.value
       val orgPath          = organization.value.replace(".", "/")
