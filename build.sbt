@@ -50,5 +50,17 @@ lazy val `scalajs-selenium-snowpack` = project
           sys.env("HOME")
         ) / s".m2/repository/com/github/mushtaq/scalajs-selenium-snowpack/scalajs-selenium-snowpack_${scalaBinaryVersion.value}"
       )
+    },
+    pomPostProcess := { input =>
+      val newArtifactId = <artifactId>{name.value}_{scalaBinaryVersion.value}</artifactId>
+      input match {
+        case elem: Elem =>
+          val updatedChild = input.child.map {
+            case elem: Elem if elem.label == "artifactId" => newArtifactId
+            case x                                        => x
+          }
+          elem.copy(child = updatedChild)
+        case x          => x
+      }
     }
   )
