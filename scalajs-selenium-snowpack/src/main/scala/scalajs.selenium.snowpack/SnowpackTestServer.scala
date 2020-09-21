@@ -29,9 +29,9 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int, extraA
        |""".stripMargin
 
   def start(): Unit = {
-    val testConfigPath = Files.createTempFile(null, ".json")
+    Files.createDirectories(crossTarget.toPath)
+    val testConfigPath = crossTarget.toPath.resolve("snowpack.test.config.json")
     Files.write(testConfigPath, snowpackTestConfig.getBytes())
-    testConfigPath.toFile.deleteOnExit()
 
     val commands           = List("npm", "start", "--", "--config", testConfigPath.toString)
     val baseProcessBuilder = new ProcessBuilder((commands ++ extraArgs): _*).directory(baseDir)
