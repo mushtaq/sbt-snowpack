@@ -28,19 +28,20 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int, extraA
        |}
        |""".stripMargin
 
-  def start(): Unit = {
+  def start(): String = {
     Files.createDirectories(crossTarget.toPath)
     val testConfigPath = crossTarget.toPath.resolve("snowpack.test.config.json")
     Files.write(testConfigPath, snowpackTestConfig.getBytes())
 
-    val commands           = List("npm", "start", "--", "--config", testConfigPath.toString)
-    val baseProcessBuilder = new ProcessBuilder((commands ++ extraArgs): _*).directory(baseDir)
+    val commands           = List("npm", "start", "--", "--config", testConfigPath.toString) ++ extraArgs
+    val baseProcessBuilder = new ProcessBuilder(commands: _*).directory(baseDir)
 
     val processBuilder =
       if (enableStdout) baseProcessBuilder.inheritIO()
       else baseProcessBuilder.redirectError(Redirect.INHERIT)
 
     process.set(Some(processBuilder.start()))
+    commands.mkString(" ")
   }
 
   def stop(): Unit = {
