@@ -7,10 +7,9 @@ import java.util.concurrent.atomic.AtomicReference
 
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
-class SnowpackTestServer(baseDir: File) {
+class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int, extraArgs: List[String], enableStdout: Boolean) {
   private val contentDirName = "test-run"
-  private val contentDir     = s"$baseDir/target/$contentDirName"
-  private val testPort       = 9091
+  private val contentDir     = s"$crossTarget/$contentDirName"
   private val webRoot        = s"http://localhost:$testPort/"
 
   private val process: AtomicReference[Option[Process]] = new AtomicReference(None)
@@ -34,9 +33,12 @@ class SnowpackTestServer(baseDir: File) {
     Files.write(testConfigPath, snowpackTestConfig.getBytes())
     testConfigPath.toFile.deleteOnExit()
 
-    val processBuilder = new ProcessBuilder("npm", "start", "--", "--config", testConfigPath.toString)
-      .directory(baseDir)
-      .redirectError(Redirect.INHERIT)
+    val commands           = List("npm", "start", "--", "--config", testConfigPath.toString)
+    val baseProcessBuilder = new ProcessBuilder((commands ++ extraArgs): _*).directory(baseDir)
+
+    val processBuilder =
+      if (enableStdout) baseProcessBuilder.inheritIO()
+      else baseProcessBuilder.redirectError(Redirect.INHERIT)
 
     process.set(Some(processBuilder.start()))
   }
