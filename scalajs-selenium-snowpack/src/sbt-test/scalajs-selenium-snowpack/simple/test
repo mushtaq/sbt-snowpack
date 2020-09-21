@@ -1,2 +1,6 @@
 > startSnowpackTestServer
 > stopSnowpackTestServer
+> startSnowpackTestServer
+> startSnowpackTestServer
+> stopSnowpackTestServer
+> stopSnowpackTestServer

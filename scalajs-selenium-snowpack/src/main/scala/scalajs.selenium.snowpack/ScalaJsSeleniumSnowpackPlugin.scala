@@ -30,10 +30,7 @@ object ScalaJsSeleniumSnowpackPlugin extends AutoPlugin {
       extraArgs.value,
       enableStdout.value
     ),
-    startSnowpackTestServer := {
-      val command = snowpackTestServer.value.start()
-      streams.value.log.info(s"starting snowpack: '$command'")
-    },
+    startSnowpackTestServer := snowpackTestServer.value.start(),
     stopSnowpackTestServer := snowpackTestServer.value.stop()
   )
 }
