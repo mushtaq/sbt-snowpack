@@ -13,12 +13,14 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int, extraA
 
   @volatile
   private var process: Option[Process] = None
+  sys.addShutdownHook(process.foreach(_.destroy()))
 
   private val snowpackTestConfig: String =
     s"""
        |{
        |  "mount": {
-       |    "$contentDir" : "/"
+       |    "$contentDir" : "/",
+       |    "$crossTarget" : "/_dist_"
        |  },
        |  "devOptions": {
        |    "port": $testPort,
