@@ -1,15 +1,13 @@
-package scalajs.selenium.snowpack
+package sbt.snowpack
 
 import java.io.File
 import java.lang.ProcessBuilder.Redirect
 import java.nio.file.Files
 
-import org.scalajs.jsenv.selenium.SeleniumJSEnv
-
 class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int, extraArgs: List[String], enableStdout: Boolean) {
   private val contentDirName = "test-run"
-  private val contentDir     = s"$crossTarget/$contentDirName"
-  private val webRoot        = s"http://localhost:$testPort/"
+  val contentDir             = s"$crossTarget/$contentDirName"
+  val webRoot                = s"http://localhost:$testPort/"
 
   @volatile
   private var process: Option[Process] = None
@@ -66,10 +64,4 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int, extraA
       }
       process = None
     }
-
-  def seleniumConfig: SeleniumJSEnv.Config = {
-    SeleniumJSEnv
-      .Config()
-      .withMaterializeInServer(contentDir, webRoot)
-  }
 }

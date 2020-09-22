@@ -1,9 +1,9 @@
-package scalajs.selenium.snowpack
+package sbt.snowpack
 
-import sbt.Keys._
 import sbt._
+import sbt.Keys._
 
-object ScalaJsSeleniumSnowpackPlugin extends AutoPlugin {
+object SnowpackTestPlugin extends AutoPlugin {
   override val trigger: PluginTrigger = noTrigger
 
   override val requires: Plugins = plugins.JvmPlugin
