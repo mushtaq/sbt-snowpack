@@ -5,6 +5,7 @@ import typings.rxjs.{mod => rxjs, rxjsMod => ops}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
 
 object Utils {
   def printEachAndCollect(n: Int): Future[List[Double]] = {
@@ -14,5 +15,9 @@ object Utils {
     result.toPromise[js.Array[Double]]().toFuture.map(_.toList)
   }
 
-  def camelcase(input: String): String = Camelcase(input)
+  def camelcase(input: String): String = camelCaseHelper(input)
+
+  @JSImport("https://cdn.skypack.dev/camelcase@^6.0.0", JSImport.Default)
+  @js.native
+  private def camelCaseHelper(input: String): String = js.native
 }

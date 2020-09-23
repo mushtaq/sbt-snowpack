@@ -1,7 +1,7 @@
 {
   "mount": {
     "public": "/",
-    "target/scala-2.13": "/_dist_"
+    "target/scala-2.13/snowpack": "/_dist_"
   },
   "plugins": [
     [
