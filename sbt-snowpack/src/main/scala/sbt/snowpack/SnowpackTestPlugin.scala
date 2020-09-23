@@ -15,6 +15,7 @@ object SnowpackTestPlugin extends AutoPlugin {
     lazy val snowpackTestServer         = settingKey[SnowpackTestServer]("process handle of the test server")
     lazy val startSnowpackTestServer    = taskKey[Unit]("start snowpack test server")
     lazy val stopSnowpackTestServer     = taskKey[Unit]("stop snowpack test server")
+    lazy val reStartSnowpackTestServer  = taskKey[Unit]("restart snowpack test server")
     lazy val generateSnowpackTestConfig = taskKey[Path]("generate snowpack test config")
   }
 
@@ -29,6 +30,12 @@ object SnowpackTestPlugin extends AutoPlugin {
     ),
     startSnowpackTestServer := snowpackTestServer.value.start(),
     stopSnowpackTestServer := snowpackTestServer.value.stop(),
-    generateSnowpackTestConfig := snowpackTestServer.value.generateTestConfig()
+    reStartSnowpackTestServer := snowpackTestServer.value.restart(),
+    generateSnowpackTestConfig := snowpackTestServer.value.generateTestConfig(),
+    Global / onLoad := {
+      (Global / onLoad).value.compose {
+        _.addExitHook(snowpackTestServer.value.stop())
+      }
+    }
   )
 }

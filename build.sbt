@@ -58,12 +58,6 @@ lazy val `example` = project
       `scala-async`,
       ScalablyTyped.R.rxjs
     ),
-    jsEnv := new SeleniumJSEnv(
-      new ChromeOptions().setHeadless(true),
-      SeleniumJSEnv
-        .Config()
-        .withMaterializeInServer(snowpackTestServer.value.contentDir, snowpackTestServer.value.webRoot)
-    ),
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) },
     scalaVersion := "2.13.3",
@@ -81,9 +75,11 @@ lazy val `example` = project
       //      "-Xasync" does not work with Scala.js js yet
     ),
     crossTarget in fastOptJS := snowpackTestServer.value.snowpackMountDir.toFile,
-    startSnowpackTestServer := {
-      if ((Test / fastOptJS).value.data.isFile) {
-        startSnowpackTestServer.value
-      }
-    }
+    startSnowpackTestServer := startSnowpackTestServer.dependsOn(Test / fastOptJS).value,
+    jsEnv := new SeleniumJSEnv(
+      new ChromeOptions().setHeadless(true),
+      SeleniumJSEnv
+        .Config()
+        .withMaterializeInServer(snowpackTestServer.value.contentDir, snowpackTestServer.value.webRoot)
+    )
   )

@@ -68,4 +68,9 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
       }
       process = None
     }
+
+  def restart(): Unit = {
+    stop()
+    start()
+  }
 }
