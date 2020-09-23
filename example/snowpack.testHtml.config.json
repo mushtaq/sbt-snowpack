@@ -1,0 +1,8 @@
+{
+  "mount": {
+    "target/scala-2.13/example-fastopt-test-html": "/"
+  },
+  "devOptions": {
+    "port": 9092
+  }
+}

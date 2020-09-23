@@ -1,21 +1,14 @@
+import Libs._
+import org.openqa.selenium.chrome.ChromeOptions
+import org.scalajs.jsenv.selenium.SeleniumJSEnv
+
 inThisBuild(
   Seq(
-    scalaVersion := "2.12.12",
     version := "0.1.0-SNAPSHOT",
     organization := "com.github.mushtaq.sbt-snowpack",
     organizationName := "ThoughtWorks",
     resolvers += "jitpack" at "https://jitpack.io",
     scalafmtOnCompile := true,
-    scalacOptions ++= Seq(
-      "-encoding",
-      "UTF-8",
-      "-feature",
-      "-unchecked",
-      "-deprecation",
-      "-Xlint:-unused,_",
-      "-Ywarn-dead-code",
-      "-Xfuture"
-    ),
     licenses := Seq(
       ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
     )
@@ -29,6 +22,7 @@ lazy val `sbt-snowpack-root` = project
 lazy val `sbt-snowpack` = project
   .enablePlugins(ScriptedPlugin)
   .settings(
+    scalaVersion := "2.12.12",
     scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
     scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(a => Seq("-Xmx", "-Xms", "-XX", "-Dsbt.log.noformat").exists(a.startsWith)),
     scriptedBufferLog := false,
@@ -43,5 +37,53 @@ lazy val `sbt-snowpack` = project
       println(s"originalLocation ----------> $originalLocation")
       println(s"newLocation      ----------> $newLocation")
       originalLocation.renameTo(newLocation)
+    },
+    scalacOptions ++= Seq(
+      "-encoding",
+      "UTF-8",
+      "-feature",
+      "-unchecked",
+      "-deprecation",
+      "-Xlint:-unused,_",
+      "-Ywarn-dead-code",
+      "-Xfuture"
+    )
+  )
+
+lazy val `example` = project
+  .enablePlugins(ScalaJSPlugin, SnowpackTestPlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      scalatest.value % Test,
+      `scala-async`,
+      ScalablyTyped.R.rxjs
+    ),
+    jsEnv := new SeleniumJSEnv(
+      new ChromeOptions().setHeadless(true),
+      SeleniumJSEnv
+        .Config()
+        .withMaterializeInServer(snowpackTestServer.value.contentDir, snowpackTestServer.value.webRoot)
+    ),
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) },
+    scalaVersion := "2.13.3",
+    scalacOptions ++= Seq(
+      "-encoding",
+      "UTF-8",
+      "-feature",
+      "-unchecked",
+      "-deprecation",
+      "-Wconf:any:warning-verbose",
+      "-Wdead-code",
+      "-Xlint:_,-missing-interpolator",
+      "-Xsource:3",
+      "-Xcheckinit"
+      //      "-Xasync" does not work with Scala.js js yet
+    ),
+    crossTarget in fastOptJS := snowpackTestServer.value.snowpackMountDir.toFile,
+    startSnowpackTestServer := {
+      if ((Test / fastOptJS).value.data.isFile) {
+        startSnowpackTestServer.value
+      }
     }
   )

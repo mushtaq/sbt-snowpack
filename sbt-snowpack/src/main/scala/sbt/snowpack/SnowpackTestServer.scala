@@ -5,10 +5,12 @@ import java.lang.ProcessBuilder.Redirect
 import java.nio.file.{Files, Path}
 
 class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
-  private val contentDirName  = "test-run"
-  val contentDir              = s"$crossTarget/$contentDirName"
-  val webRoot                 = s"http://localhost:$testPort/"
-  private val testConfigPath  = crossTarget.toPath.resolve("snowpack.test.config.json")
+  private val contentDirName = "test-run"
+  val webRoot                = s"http://localhost:$testPort/$contentDirName/"
+  val snowpackMountDir: Path = crossTarget.toPath.resolve("snowpack")
+  val contentDir = s"$snowpackMountDir/$contentDirName"
+
+  private val testConfigPath  = snowpackMountDir.resolve("snowpack.test.config.json")
   private val startCommand    = List("npx", "snowpack", "dev", "--config", testConfigPath.toString)
   private val startCommandStr = startCommand.mkString(" ")
 
@@ -20,7 +22,7 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
     s"""
        |{
        |  "mount": {
-       |    "$contentDir" : "/"
+       |    "$snowpackMountDir" : "/"
        |  },
        |  "devOptions": {
        |    "port": $testPort,
@@ -32,7 +34,7 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
 
   def generateTestConfig(): Path =
     synchronized {
-      Files.createDirectories(crossTarget.toPath)
+      Files.createDirectories(snowpackMountDir)
       Files.write(testConfigPath, snowpackTestConfig.getBytes())
       println(s"generated config: $testConfigPath")
       println(s"usage: '$startCommandStr'")

@@ -11,10 +11,10 @@ object SnowpackTestPlugin extends AutoPlugin {
   override val requires: Plugins = plugins.JvmPlugin
 
   object autoImport {
-    lazy val testPort = settingKey[Int]("port number to be used by snowpack test server")
-    lazy val snowpackTestServer = settingKey[SnowpackTestServer]("process handle of the test server")
-    lazy val startSnowpackTestServer = taskKey[Unit]("start snowpack test server")
-    lazy val stopSnowpackTestServer = taskKey[Unit]("stop snowpack test server")
+    lazy val testPort                   = settingKey[Int]("port number to be used by snowpack test server")
+    lazy val snowpackTestServer         = settingKey[SnowpackTestServer]("process handle of the test server")
+    lazy val startSnowpackTestServer    = taskKey[Unit]("start snowpack test server")
+    lazy val stopSnowpackTestServer     = taskKey[Unit]("stop snowpack test server")
     lazy val generateSnowpackTestConfig = taskKey[Path]("generate snowpack test config")
   }
 
