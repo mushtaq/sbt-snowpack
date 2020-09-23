@@ -2,12 +2,15 @@ package sbt.snowpack
 
 import java.io.File
 import java.lang.ProcessBuilder.Redirect
-import java.nio.file.Files
+import java.nio.file.{Files, Path}
 
-class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int, extraArgs: List[String], enableStdout: Boolean) {
-  private val contentDirName = "test-run"
-  val contentDir             = s"$crossTarget/$contentDirName"
-  val webRoot                = s"http://localhost:$testPort/"
+class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
+  private val contentDirName  = "test-run"
+  val contentDir              = s"$crossTarget/$contentDirName"
+  val webRoot                 = s"http://localhost:$testPort/"
+  private val testConfigPath  = crossTarget.toPath.resolve("snowpack.test.config.json")
+  private val startCommand    = List("npx", "snowpack", "dev", "--config", testConfigPath.toString)
+  private val startCommandStr = startCommand.mkString(" ")
 
   @volatile
   private var process: Option[Process] = None
@@ -17,8 +20,7 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int, extraA
     s"""
        |{
        |  "mount": {
-       |    "$contentDir" : "/",
-       |    "$crossTarget" : "/_dist_"
+       |    "$contentDir" : "/"
        |  },
        |  "devOptions": {
        |    "port": $testPort,
@@ -28,27 +30,27 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int, extraA
        |}
        |""".stripMargin
 
-  def start(): Unit =
+  def generateTestConfig(): Path =
     synchronized {
       Files.createDirectories(crossTarget.toPath)
-      val testConfigPath = crossTarget.toPath.resolve("snowpack.test.config.json")
       Files.write(testConfigPath, snowpackTestConfig.getBytes())
+      println(s"generated config: $testConfigPath")
+      println(s"usage: '$startCommandStr'")
+      testConfigPath
+    }
 
-      val commands           = List("npm", "start", "--", "--config", testConfigPath.toString) ++ extraArgs
-      val baseProcessBuilder = new ProcessBuilder(commands: _*).directory(baseDir)
-
-      val processBuilder =
-        if (enableStdout) baseProcessBuilder.inheritIO()
-        else baseProcessBuilder.redirectError(Redirect.INHERIT)
-
-      val command = commands.mkString(" ")
+  def start(): Unit =
+    synchronized {
+      generateTestConfig()
+      val processBuilder = new ProcessBuilder(startCommand: _*)
+        .directory(baseDir)
+        .redirectError(Redirect.INHERIT)
 
       process match {
         case Some(value) =>
           println(s"snowpack test server already running on port:$testPort and pid:${value.pid()}")
-          println(s"command used: '$command'")
         case None        =>
-          println(s"starting snowpack: '$command'")
+          println(s"starting snowpack using above command")
           process = Some(processBuilder.start())
       }
     }
