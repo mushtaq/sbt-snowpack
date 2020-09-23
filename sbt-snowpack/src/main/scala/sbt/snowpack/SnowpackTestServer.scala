@@ -8,7 +8,7 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
   private val contentDirName = "test-run"
   val webRoot                = s"http://localhost:$testPort/$contentDirName/"
   val snowpackMountDir: Path = crossTarget.toPath.resolve("snowpack")
-  val contentDir = s"$snowpackMountDir/$contentDirName"
+  val contentDir             = s"$snowpackMountDir/$contentDirName"
 
   private val testConfigPath  = snowpackMountDir.resolve("snowpack.test.config.json")
   private val startCommand    = List("npx", "snowpack", "dev", "--config", testConfigPath.toString)

@@ -17,7 +17,7 @@ inThisBuild(
 
 lazy val `sbt-snowpack-root` = project
   .in(file("."))
-  .aggregate(`sbt-snowpack`)
+  .aggregate(`sbt-snowpack`, `example`)
 
 lazy val `sbt-snowpack` = project
   .enablePlugins(ScriptedPlugin)
