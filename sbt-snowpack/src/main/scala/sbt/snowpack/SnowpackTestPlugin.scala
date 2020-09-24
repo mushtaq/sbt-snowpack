@@ -31,7 +31,10 @@ object SnowpackTestPlugin extends AutoPlugin {
       testPort.value
     ),
     stopSnowpackTestServer := snowpackTestServer.value.stop(),
-    reStartSnowpackTestServer := snowpackTestServer.value.restart(),
+    reStartSnowpackTestServer := {
+      val _ = stopSnowpackTestServer.value
+      startSnowpackTestServer.value
+    },
     generateSnowpackTestConfig := snowpackTestServer.value.generateTestConfig(),
     Global / onLoad := {
       (Global / onLoad).value.compose {

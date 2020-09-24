@@ -14,7 +14,7 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
 
   private val testConfigPath  = snowpackMountDir.resolve("snowpack.test.config.json")
   private val userConfigPath  = baseDir.toPath.resolve("snowpack.test.config.json")
-  private val startCommand    = List("npx", "snowpack", "dev", "--config", testConfigPath.toString)
+  private val startCommand    = List("npx", "snowpack", "dev", "--config", testConfigPath.toString, "--reload")
   private val startCommandStr = startCommand.mkString(" ")
 
   @volatile
@@ -73,11 +73,6 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
       }
       process = None
     }
-
-  def restart(): Unit = {
-    stop()
-    start()
-  }
 
   def seleniumJsEnv: SeleniumJSEnv = {
     new SeleniumJSEnv(
