@@ -2,13 +2,15 @@ package sbt.snowpack
 
 import java.nio.file.Path
 
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastOptJS, jsEnv}
 import sbt.Keys._
 import sbt._
 
 object SnowpackTestPlugin extends AutoPlugin {
   override val trigger: PluginTrigger = noTrigger
 
-  override val requires: Plugins = plugins.JvmPlugin
+  override val requires: Plugins = plugins.JvmPlugin && ScalaJSPlugin
 
   object autoImport {
     lazy val testPort                   = settingKey[Int]("port number to be used by snowpack test server")
@@ -28,7 +30,6 @@ object SnowpackTestPlugin extends AutoPlugin {
       crossTarget.value,
       testPort.value
     ),
-    startSnowpackTestServer := snowpackTestServer.value.start(),
     stopSnowpackTestServer := snowpackTestServer.value.stop(),
     reStartSnowpackTestServer := snowpackTestServer.value.restart(),
     generateSnowpackTestConfig := snowpackTestServer.value.generateTestConfig(),
@@ -36,6 +37,12 @@ object SnowpackTestPlugin extends AutoPlugin {
       (Global / onLoad).value.compose {
         _.addExitHook(snowpackTestServer.value.stop())
       }
+    },
+    jsEnv := snowpackTestServer.value.seleniumJsEnv,
+    fastOptJS / crossTarget := snowpackTestServer.value.snowpackMountDir.toFile,
+    startSnowpackTestServer := {
+      val _ = (Test / fastOptJS).value
+      snowpackTestServer.value.start()
     }
   )
 }

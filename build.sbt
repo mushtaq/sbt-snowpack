@@ -1,6 +1,6 @@
 import Libs._
-import org.openqa.selenium.chrome.ChromeOptions
-import org.scalajs.jsenv.selenium.SeleniumJSEnv
+
+import scala.collection.JavaConverters.asScalaBufferConverter
 
 inThisBuild(
   Seq(
@@ -24,12 +24,15 @@ lazy val `sbt-snowpack` = project
   .settings(
     scalaVersion := "2.12.12",
     scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
-    scriptedLaunchOpts ++= sys.process.javaVmArguments.filter(a => Seq("-Xmx", "-Xms", "-XX", "-Dsbt.log.noformat").exists(a.startsWith)),
+    scriptedLaunchOpts ++= {
+      val list = java.lang.management.ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.toList
+      list.filter(a => Seq("-Xmx", "-Xms", "-XX", "-Dsbt.log.noformat").exists(a.startsWith))
+    },
     scriptedBufferLog := false,
     sbtPlugin := true,
     publishMavenStyle := true,
     publishM2 := {
-      publishM2.value
+      val _                = publishM2.value
       val orgPath          = organization.value.replace(".", "/")
       val basePath         = s".m2/repository/$orgPath/${name.value}"
       val originalLocation = file(sys.env("HOME")) / s"${basePath}_${scalaBinaryVersion.value}_${sbtBinaryVersion.value}"
@@ -47,7 +50,9 @@ lazy val `sbt-snowpack` = project
       "-Xlint:-unused,_",
       "-Ywarn-dead-code",
       "-Xfuture"
-    )
+    ),
+    libraryDependencies += "com.github.mushtaq.scala-js-env-selenium" %% "scalajs-env-selenium" % "5374c6b",
+    addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.2.0")
   )
 
 lazy val `example` = project
@@ -73,13 +78,5 @@ lazy val `example` = project
       "-Xsource:3",
       "-Xcheckinit"
       //      "-Xasync" does not work with Scala.js js yet
-    ),
-    crossTarget in fastOptJS := snowpackTestServer.value.snowpackMountDir.toFile,
-    startSnowpackTestServer := startSnowpackTestServer.dependsOn(Test / fastOptJS).value,
-    jsEnv := new SeleniumJSEnv(
-      new ChromeOptions().setHeadless(true),
-      SeleniumJSEnv
-        .Config()
-        .withMaterializeInServer(snowpackTestServer.value.contentDir, snowpackTestServer.value.webRoot)
     )
   )

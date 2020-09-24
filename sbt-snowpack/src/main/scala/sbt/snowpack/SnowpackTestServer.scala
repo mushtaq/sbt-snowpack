@@ -3,6 +3,8 @@ package sbt.snowpack
 import java.io.File
 import java.lang.ProcessBuilder.Redirect
 import java.nio.file.{Files, Path}
+import org.openqa.selenium.chrome.ChromeOptions
+import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
   private val contentDirName = "test-run"
@@ -72,5 +74,14 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
   def restart(): Unit = {
     stop()
     start()
+  }
+
+  def seleniumJsEnv: SeleniumJSEnv = {
+    new SeleniumJSEnv(
+      new ChromeOptions().setHeadless(true),
+      SeleniumJSEnv
+        .Config()
+        .withMaterializeInServer(contentDir, webRoot)
+    )
   }
 }
