@@ -13,6 +13,7 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
   val contentDir             = s"$snowpackMountDir/$contentDirName"
 
   private val testConfigPath  = snowpackMountDir.resolve("snowpack.test.config.json")
+  private val userConfigPath  = baseDir.toPath.resolve("snowpack.test.config.json")
   private val startCommand    = List("npx", "snowpack", "dev", "--config", testConfigPath.toString)
   private val startCommandStr = startCommand.mkString(" ")
 
@@ -20,9 +21,11 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
   private var process: Option[Process] = None
   sys.addShutdownHook(process.foreach(_.destroy()))
 
-  private val snowpackTestConfig: String =
-    s"""
-       |{
+  private def extendsClause = if (userConfigPath.toFile.exists()) s""""extends": "$userConfigPath",""" else ""
+
+  private def snowpackTestConfig: String =
+    s"""{
+       |  $extendsClause
        |  "mount": {
        |    "$snowpackMountDir" : "/"
        |  },
