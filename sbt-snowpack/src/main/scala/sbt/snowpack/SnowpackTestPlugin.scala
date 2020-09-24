@@ -3,7 +3,7 @@ package sbt.snowpack
 import java.nio.file.Path
 
 import org.scalajs.sbtplugin.ScalaJSPlugin
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.{fastOptJS, jsEnv}
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
 import sbt._
 
@@ -43,6 +43,8 @@ object SnowpackTestPlugin extends AutoPlugin {
     startSnowpackTestServer := {
       val _ = (Test / fastOptJS).value
       snowpackTestServer.value.start()
-    }
+    },
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) }
   )
 }

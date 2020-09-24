@@ -63,8 +63,6 @@ lazy val `example` = project
       `scala-async`,
       ScalablyTyped.R.rxjs
     ),
-    scalaJSUseMainModuleInitializer := true,
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) },
     scalaVersion := "2.13.3",
     scalacOptions ++= Seq(
       "-encoding",
