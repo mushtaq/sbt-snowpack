@@ -9,7 +9,7 @@ import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 import scala.util.control.NonFatal
 
-class SnowpackTestServer(baseDir: File, crossTarget: File) {
+class SnowpackTestServer(baseDir: File, crossTarget: File, projectName: String) {
   @volatile
   private var process: Option[Process] = None
   sys.addShutdownHook(process.foreach(_.destroy()))
@@ -35,7 +35,8 @@ class SnowpackTestServer(baseDir: File, crossTarget: File) {
     s"""{
        |  $extendsClause
        |  "mount": {
-       |    "$snowpackMountDir" : "/"
+       |    "$snowpackMountDir" : "/",
+       |    "$crossTarget/$projectName-fastopt-test-html": "/testHtml"
        |  },
        |  "devOptions": {
        |    "port": $port,

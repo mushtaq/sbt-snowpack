@@ -23,7 +23,7 @@ object SnowpackTestPlugin extends AutoPlugin {
   import autoImport._
 
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
-    snowpackTestServer := new SnowpackTestServer(baseDirectory.value, crossTarget.value),
+    snowpackTestServer := new SnowpackTestServer(baseDirectory.value, crossTarget.value, name.value),
     startSnowpackTestServer := {
       val _ = (Test / fastOptJS).value
       snowpackTestServer.value.start()
