@@ -13,7 +13,6 @@ object SnowpackTestPlugin extends AutoPlugin {
   override val requires: Plugins = plugins.JvmPlugin && ScalaJSPlugin
 
   object autoImport {
-    lazy val testPort                   = settingKey[Int]("port number to be used by snowpack test server")
     lazy val snowpackTestServer         = settingKey[SnowpackTestServer]("process handle of the test server")
     lazy val startSnowpackTestServer    = taskKey[Unit]("start snowpack test server")
     lazy val stopSnowpackTestServer     = taskKey[Unit]("stop snowpack test server")
@@ -24,18 +23,19 @@ object SnowpackTestPlugin extends AutoPlugin {
   import autoImport._
 
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
-    testPort := 9091,
     snowpackTestServer := new SnowpackTestServer(
       baseDirectory.value,
-      crossTarget.value,
-      testPort.value
+      crossTarget.value
     ),
     stopSnowpackTestServer := snowpackTestServer.value.stop(),
     reStartSnowpackTestServer := {
       val _ = stopSnowpackTestServer.value
       startSnowpackTestServer.value
     },
-    generateSnowpackTestConfig := snowpackTestServer.value.generateTestConfig(),
+    generateSnowpackTestConfig := {
+      snowpackTestServer.value.generateTestConfig()
+      snowpackTestServer.value.testConfigPath
+    },
     Global / onLoad := {
       (Global / onLoad).value.compose {
         _.addExitHook(snowpackTestServer.value.stop())

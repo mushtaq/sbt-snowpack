@@ -7,6 +7,7 @@ libraryDependencies += "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value
 
 resolvers += "jitpack" at "https://jitpack.io"
 libraryDependencies += "com.github.mushtaq.scala-js-env-selenium" %% "scalajs-env-selenium" % "5374c6b"
+libraryDependencies += "com.lihaoyi"                              %% "ujson"                % "1.2.0"
 
 scalacOptions ++= Seq(
   "-encoding",

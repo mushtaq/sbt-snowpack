@@ -3,61 +3,71 @@ package sbt.snowpack
 import java.io.File
 import java.lang.ProcessBuilder.Redirect
 import java.nio.file.{Files, Path}
+
 import org.openqa.selenium.chrome.ChromeOptions
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
-class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
-  private val contentDirName = "test-run"
-  val webRoot                = s"http://localhost:$testPort/$contentDirName/"
-  val snowpackMountDir: Path = crossTarget.toPath.resolve("snowpack")
-  val contentDir             = s"$snowpackMountDir/$contentDirName"
+import scala.util.control.NonFatal
 
-  private val testConfigPath  = snowpackMountDir.resolve("snowpack.test.config.json")
-  private val userConfigPath  = baseDir.toPath.resolve("snowpack.test.config.json")
-  private val startCommand    = List("npx", "snowpack", "dev", "--config", testConfigPath.toString, "--reload")
-  private val startCommandStr = startCommand.mkString(" ")
-
+class SnowpackTestServer(baseDir: File, crossTarget: File) {
   @volatile
   private var process: Option[Process] = None
   sys.addShutdownHook(process.foreach(_.destroy()))
 
-  private def extendsClause = if (userConfigPath.toFile.exists()) s""""extends": "$userConfigPath",""" else ""
+  val snowpackMountDir: Path = crossTarget.toPath.resolve("snowpack")
+  val testConfigPath: Path   = snowpackMountDir.resolve("snowpack.test.config.json")
 
-  private def snowpackTestConfig: String =
+  private val startCommand    = List("npx", "snowpack", "dev", "--config", testConfigPath.toString, "--reload")
+  private val startCommandStr = startCommand.mkString(" ")
+  private val userConfigPath  = baseDir.toPath.resolve("snowpack.test.config.json")
+
+  def testPort(): Int = {
+    try {
+      val json = ujson.read(Files.readString(userConfigPath))
+      json("devOptions")("port").num.toInt
+    } catch {
+      case NonFatal(_) => 9091
+    }
+  }
+
+  private def snowpackTestConfig(port: Int): String = {
+    val extendsClause = if (userConfigPath.toFile.exists()) s""""extends": "$userConfigPath",""" else ""
     s"""{
        |  $extendsClause
        |  "mount": {
        |    "$snowpackMountDir" : "/"
        |  },
        |  "devOptions": {
-       |    "port": $testPort,
+       |    "port": $port,
        |    "open": "none",
        |    "hmr": false
        |  }
        |}
        |""".stripMargin
+  }
 
-  def generateTestConfig(): Path =
+  def generateTestConfig(): Int =
     synchronized {
+      val port = testPort()
       Files.createDirectories(snowpackMountDir)
-      Files.write(testConfigPath, snowpackTestConfig.getBytes())
+      Files.write(testConfigPath, snowpackTestConfig(port).getBytes())
       println(s"generated config: $testConfigPath")
       println(s"usage: '$startCommandStr'")
-      testConfigPath
+      port
     }
 
   def start(): Unit =
     synchronized {
-      generateTestConfig()
+      val port           = generateTestConfig()
       val processBuilder = new ProcessBuilder(startCommand: _*)
         .directory(baseDir)
         .redirectError(Redirect.INHERIT)
 
       process match {
         case Some(value) =>
-          println(s"snowpack test server already running on port:$testPort and pid:${value.pid()}")
+          println(s"snowpack test server already running on port:$port and pid:${value.pid()}")
         case None        =>
-          println(s"starting snowpack using above command")
+          println(s"starting snowpack test server on port: $port using above command")
           process = Some(processBuilder.start())
       }
     }
@@ -75,6 +85,10 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, testPort: Int) {
     }
 
   def seleniumJsEnv: SeleniumJSEnv = {
+    val contentDirName = "test-run"
+    val webRoot        = s"http://localhost:${testPort()}/$contentDirName/"
+    val contentDir     = s"$snowpackMountDir/$contentDirName"
+
     new SeleniumJSEnv(
       new ChromeOptions().setHeadless(true),
       SeleniumJSEnv
