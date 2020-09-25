@@ -23,10 +23,11 @@ object SnowpackTestPlugin extends AutoPlugin {
   import autoImport._
 
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
-    snowpackTestServer := new SnowpackTestServer(
-      baseDirectory.value,
-      crossTarget.value
-    ),
+    snowpackTestServer := new SnowpackTestServer(baseDirectory.value, crossTarget.value),
+    startSnowpackTestServer := {
+      val _ = (Test / fastOptJS).value
+      snowpackTestServer.value.start()
+    },
     stopSnowpackTestServer := snowpackTestServer.value.stop(),
     reStartSnowpackTestServer := {
       val _ = stopSnowpackTestServer.value
@@ -36,18 +37,14 @@ object SnowpackTestPlugin extends AutoPlugin {
       snowpackTestServer.value.generateTestConfig()
       snowpackTestServer.value.testConfigPath
     },
+    jsEnv := snowpackTestServer.value.seleniumJsEnv,
+    fastOptJS / crossTarget := snowpackTestServer.value.snowpackMountDir.toFile,
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) },
     Global / onLoad := {
       (Global / onLoad).value.compose {
         _.addExitHook(snowpackTestServer.value.stop())
       }
-    },
-    jsEnv := snowpackTestServer.value.seleniumJsEnv,
-    fastOptJS / crossTarget := snowpackTestServer.value.snowpackMountDir.toFile,
-    startSnowpackTestServer := {
-      val _ = (Test / fastOptJS).value
-      snowpackTestServer.value.start()
-    },
-    scalaJSUseMainModuleInitializer := true,
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) }
+    }
   )
 }
