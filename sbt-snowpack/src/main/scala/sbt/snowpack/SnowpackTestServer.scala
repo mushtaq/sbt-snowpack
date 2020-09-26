@@ -6,19 +6,17 @@ import java.nio.file.{Files, Path}
 
 import org.openqa.selenium.chrome.ChromeOptions
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
-import ujson.Obj
-
-import scala.util.control.NonFatal
+import play.api.libs.json.{JsObject, Json}
 
 class SnowpackTestServer(projectBaseDir: File, crossTarget: File, projectName: String)
     extends SnowpackServer(projectBaseDir, crossTarget, "test") {
-  protected def baseJson(port: Int): Obj =
-    ujson.Obj(
-      "mount"      -> ujson.Obj(
+  protected def baseJson(port: Int): JsObject =
+    Json.obj(
+      "mount"      -> Json.obj(
         snowpackMountDir.toString                      -> "/",
         s"$crossTarget/$projectName-fastopt-test-html" -> "/testHtml"
       ),
-      "devOptions" -> ujson.Obj(
+      "devOptions" -> Json.obj(
         "port" -> port,
         "open" -> "none",
         "hmr"  -> false
@@ -28,19 +26,19 @@ class SnowpackTestServer(projectBaseDir: File, crossTarget: File, projectName: S
 
 class SnowpackDevServer(projectBaseDir: File, crossTarget: File, projectName: String, rootBaseDir: File)
     extends SnowpackServer(projectBaseDir, crossTarget, "dev") {
-  protected def baseJson(port: Int): Obj =
-    ujson.Obj(
-      "mount"      -> ujson.Obj(
+  protected def baseJson(port: Int): JsObject =
+    Json.obj(
+      "mount"      -> Json.obj(
         "public"                  -> "/",
         snowpackMountDir.toString -> "/_dist_"
       ),
-      "devOptions" -> ujson.Obj(
+      "devOptions" -> Json.obj(
         "port" -> port
       ),
-      "plugins"    -> ujson.Arr(
-        ujson.Arr(
+      "plugins"    -> Json.arr(
+        Json.arr(
           "@snowpack/plugin-run-script",
-          ujson.Obj(
+          Json.obj(
             "cmd"   -> s"set -x; cd $rootBaseDir; sbtn $projectName/fastOptJS; cd -",
             "watch" -> s"set -x; cd $rootBaseDir; sbtn ~$projectName/fastOptJS; cd -"
           )
@@ -50,7 +48,7 @@ class SnowpackDevServer(projectBaseDir: File, crossTarget: File, projectName: St
 }
 
 abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configName: String) {
-  protected def baseJson(port: Int): Obj
+  protected def baseJson(port: Int): JsObject
 
   @volatile
   private var process: Option[Process] = None
@@ -65,21 +63,19 @@ abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configNam
   private val userConfigPath  = projectBaseDir.toPath.resolve(configFileName)
 
   def readPort(): Int = {
-    try {
-      val json = ujson.read(Files.readString(userConfigPath))
-      json("devOptions")("port").num.toInt
-    } catch {
-      case NonFatal(_) => 8080
-    }
+    if (userConfigPath.toFile.exists()) {
+      val json = Json.parse(Files.readString(userConfigPath))
+      (json \ "devOptions" \ "port").asOpt[Int].getOrElse(8080)
+    } else 8080
   }
 
   private def snowpackConfigJson(port: Int) = {
-    val extendsClause = ujson.Obj("extends" -> userConfigPath.toString)
+    val extendsClause = Json.obj("extends" -> userConfigPath.toString)
     val json = {
-      if (userConfigPath.toFile.exists()) ujson.Obj(extendsClause.obj ++= baseJson(port).obj)
+      if (userConfigPath.toFile.exists()) extendsClause ++ baseJson(port)
       else baseJson(port)
     }
-    ujson.write(json, indent = 2)
+    Json.prettyPrint(json)
   }
 
   def generateTestConfig(): Int =

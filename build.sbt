@@ -52,7 +52,7 @@ lazy val `sbt-snowpack` = project
       "-Xfuture"
     ),
     libraryDependencies += "com.github.mushtaq.scala-js-env-selenium" %% "scalajs-env-selenium" % "5374c6b",
-    libraryDependencies += "com.lihaoyi"                              %% "ujson"                % "1.2.0",
+    libraryDependencies += "com.typesafe.play"                        %% "play-json"            % "2.9.1",
     addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.2.0")
   )
 
