@@ -30,21 +30,25 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, projectName: String) 
     }
   }
 
-  private def snowpackTestConfig(port: Int): String = {
-    val extendsClause = if (userConfigPath.toFile.exists()) s""""extends": "$userConfigPath",""" else ""
-    s"""{
-       |  $extendsClause
-       |  "mount": {
-       |    "$snowpackMountDir" : "/",
-       |    "$crossTarget/$projectName-fastopt-test-html": "/testHtml"
-       |  },
-       |  "devOptions": {
-       |    "port": $port,
-       |    "open": "none",
-       |    "hmr": false
-       |  }
-       |}
-       |""".stripMargin
+  private def snowpackTestConfig(port: Int) = {
+    val extendsClause = ujson.Obj(
+      "extends" -> userConfigPath.toString
+    )
+
+    val baseJson = ujson.Obj(
+      "mount"      -> ujson.Obj(
+        snowpackMountDir.toString                      -> "/",
+        s"$crossTarget/$projectName-fastopt-test-html" -> "/testHtml"
+      ),
+      "devOptions" -> ujson.Obj(
+        "port" -> port,
+        "open" -> "none",
+        "hmr"  -> false
+      )
+    )
+
+    val json = if (userConfigPath.toFile.exists()) ujson.Obj(extendsClause.obj ++= baseJson.obj) else baseJson
+    ujson.write(json)
   }
 
   def generateTestConfig(): Int =

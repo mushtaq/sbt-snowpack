@@ -81,9 +81,6 @@ lazy val `example` = project
     Test / test := {
       reStartSnowpackTestServer.value
       (Test / test).value
-    },
-    Test / testHtml := {
-      reStartSnowpackTestServer.value
       (Test / testHtml).value
     }
   )
