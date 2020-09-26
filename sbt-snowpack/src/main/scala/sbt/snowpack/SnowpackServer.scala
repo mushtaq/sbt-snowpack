@@ -33,8 +33,19 @@ abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configNam
   private def configJson(): JsObject = {
     val userJson    = readUserConfig()
     val userPlugins = (userJson \ "plugins").asOpt[List[JsArray]].getOrElse(Nil)
-    val allPlugins  = Json.obj("plugins" -> (pluginJson ::: userPlugins))
-    baseJson.deepMerge(userJson) ++ allPlugins
+    val userExtends = (userJson \ "extends").asOpt[String]
+    val extendsJson = userExtends
+      .map { x =>
+        projectBaseDir.toPath.resolve(Path.of(x))
+      }
+      .map { x =>
+        println("***************" + x.toString)
+        Json.obj("extends" -> x.toString)
+      }
+      .getOrElse(Json.obj())
+
+    val allPlugins = Json.obj("plugins" -> (pluginJson ::: userPlugins))
+    baseJson.deepMerge(userJson) ++ extendsJson ++ allPlugins
   }
 
   private def readPort(): Int = (configJson() \ "devOptions" \ "port").asOpt[Int].getOrElse(8080)
@@ -43,8 +54,8 @@ abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configNam
     synchronized {
       Files.createDirectories(snowpackMountDir)
       Files.write(configPath, Json.prettyPrint(configJson()).getBytes())
-      println(s"generated config: $configPath")
-      println(s"usage: '$startCommandStr'")
+      println(s"generated $configName config file, run using command:")
+      println(startCommandStr)
       configPath
     }
 
