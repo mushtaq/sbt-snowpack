@@ -35,13 +35,8 @@ abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configNam
     val userPlugins = (userJson \ "plugins").asOpt[List[JsArray]].getOrElse(Nil)
     val userExtends = (userJson \ "extends").asOpt[String]
     val extendsJson = userExtends
-      .map { x =>
-        projectBaseDir.toPath.resolve(Path.of(x))
-      }
-      .map { x =>
-        println("***************" + x.toString)
-        Json.obj("extends" -> x.toString)
-      }
+      .map(x => projectBaseDir.toPath.resolve(Path.of(x)))
+      .map(x => Json.obj("extends" -> x.toString))
       .getOrElse(Json.obj())
 
     val allPlugins = Json.obj("plugins" -> (pluginJson ::: userPlugins))
