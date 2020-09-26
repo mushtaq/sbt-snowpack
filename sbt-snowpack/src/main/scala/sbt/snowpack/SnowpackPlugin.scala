@@ -7,7 +7,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
 import sbt._
 
-object SnowpackTestPlugin extends AutoPlugin {
+object SnowpackPlugin extends AutoPlugin {
   override val trigger: PluginTrigger = noTrigger
 
   override val requires: Plugins = plugins.JvmPlugin && ScalaJSPlugin
@@ -50,10 +50,7 @@ object SnowpackTestPlugin extends AutoPlugin {
         val _ = stopSnowpackServer.value
         startSnowpackServer.value
       },
-      generateSnowpackConfig := {
-        configSnowpackServer.value.generateTestConfig()
-        configSnowpackServer.value.configPath
-      },
+      generateSnowpackConfig := configSnowpackServer.value.generateTestConfig(),
       jsEnv := configSnowpackServer.value.seleniumJsEnv,
       fastOptJS / crossTarget := configSnowpackServer.value.snowpackMountDir.toFile,
       Global / onLoad := {

@@ -57,7 +57,7 @@ lazy val `sbt-snowpack` = project
   )
 
 lazy val `example` = project
-  .enablePlugins(ScalaJSPlugin, SnowpackTestPlugin)
+  .enablePlugins(ScalaJSPlugin, SnowpackPlugin)
   .settings(
     libraryDependencies ++= Seq(
       scalatest.value % Test,
