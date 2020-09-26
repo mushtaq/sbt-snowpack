@@ -35,7 +35,7 @@ object SnowpackTestPlugin extends AutoPlugin {
     },
     generateSnowpackTestConfig := {
       snowpackTestServer.value.generateTestConfig()
-      snowpackTestServer.value.testConfigPath
+      snowpackTestServer.value.configPath
     },
     jsEnv := snowpackTestServer.value.seleniumJsEnv,
     fastOptJS / crossTarget := snowpackTestServer.value.snowpackMountDir.toFile,

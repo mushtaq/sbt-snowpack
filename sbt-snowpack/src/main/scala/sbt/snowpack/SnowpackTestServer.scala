@@ -6,36 +6,13 @@ import java.nio.file.{Files, Path}
 
 import org.openqa.selenium.chrome.ChromeOptions
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
+import ujson.Obj
 
 import scala.util.control.NonFatal
 
-class SnowpackTestServer(baseDir: File, crossTarget: File, projectName: String) {
-  @volatile
-  private var process: Option[Process] = None
-  sys.addShutdownHook(process.foreach(_.destroy()))
-
-  val snowpackMountDir: Path = crossTarget.toPath.resolve("snowpack")
-  val testConfigPath: Path   = snowpackMountDir.resolve("snowpack.test.config.json")
-
-  private val startCommand    = List("npx", "snowpack", "dev", "--config", testConfigPath.toString, "--reload")
-  private val startCommandStr = startCommand.mkString(" ")
-  private val userConfigPath  = baseDir.toPath.resolve("snowpack.test.config.json")
-
-  def testPort(): Int = {
-    try {
-      val json = ujson.read(Files.readString(userConfigPath))
-      json("devOptions")("port").num.toInt
-    } catch {
-      case NonFatal(_) => 9091
-    }
-  }
-
-  private def snowpackTestConfig(port: Int) = {
-    val extendsClause = ujson.Obj(
-      "extends" -> userConfigPath.toString
-    )
-
-    val baseJson = ujson.Obj(
+class SnowpackTestServer(baseDir: File, crossTarget: File, projectName: String) extends SnowpackServer(baseDir, crossTarget, "test") {
+  protected def baseJson(port: Int): Obj =
+    ujson.Obj(
       "mount"      -> ujson.Obj(
         snowpackMountDir.toString                      -> "/",
         s"$crossTarget/$projectName-fastopt-test-html" -> "/testHtml"
@@ -46,17 +23,47 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, projectName: String) 
         "hmr"  -> false
       )
     )
+}
 
-    val json = if (userConfigPath.toFile.exists()) ujson.Obj(extendsClause.obj ++= baseJson.obj) else baseJson
+abstract class SnowpackServer(baseDir: File, crossTarget: File, configName: String) {
+  protected def baseJson(port: Int): Obj
+
+  @volatile
+  private var process: Option[Process] = None
+  sys.addShutdownHook(process.foreach(_.destroy()))
+
+  private val configFileName = s"snowpack.${configName}.config.json"
+  val snowpackMountDir: Path = crossTarget.toPath.resolve("snowpack").resolve(configName)
+  val configPath: Path       = snowpackMountDir.resolve(configFileName)
+
+  private val startCommand    = List("npx", "snowpack", "dev", "--config", configPath.toString, "--reload")
+  private val startCommandStr = startCommand.mkString(" ")
+  private val userConfigPath  = baseDir.toPath.resolve(configFileName)
+
+  def readPort(): Int = {
+    try {
+      val json = ujson.read(Files.readString(userConfigPath))
+      json("devOptions")("port").num.toInt
+    } catch {
+      case NonFatal(_) => 8080
+    }
+  }
+
+  private def snowpackConfigJson(port: Int) = {
+    val extendsClause = ujson.Obj("extends" -> userConfigPath.toString)
+    val json = {
+      if (userConfigPath.toFile.exists()) ujson.Obj(extendsClause.obj ++= baseJson(port).obj)
+      else baseJson(port)
+    }
     ujson.write(json)
   }
 
   def generateTestConfig(): Int =
     synchronized {
-      val port = testPort()
+      val port = readPort()
       Files.createDirectories(snowpackMountDir)
-      Files.write(testConfigPath, snowpackTestConfig(port).getBytes())
-      println(s"generated config: $testConfigPath")
+      Files.write(configPath, snowpackConfigJson(port).getBytes())
+      println(s"generated config: $configPath")
       println(s"usage: '$startCommandStr'")
       port
     }
@@ -70,9 +77,9 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, projectName: String) 
 
       process match {
         case Some(value) =>
-          println(s"snowpack test server already running on port:$port and pid:${value.pid()}")
+          println(s"snowpack $configName server already running on port:$port and pid:${value.pid()}")
         case None        =>
-          println(s"starting snowpack test server on port: $port using above command")
+          println(s"starting snowpack $configName server on port: $port using above command")
           process = Some(processBuilder.start())
       }
     }
@@ -81,17 +88,17 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, projectName: String) 
     synchronized {
       process match {
         case Some(value) =>
-          println("stopping snowpack test server")
+          println(s"stopping snowpack $configName server")
           value.destroy()
         case None        =>
-          println(s"snowpack test server is already stopped")
+          println(s"snowpack $configName server is already stopped")
       }
       process = None
     }
 
   def seleniumJsEnv: SeleniumJSEnv = {
-    val contentDirName = "test-run"
-    val webRoot        = s"http://localhost:${testPort()}/$contentDirName/"
+    val contentDirName = "selenium"
+    val webRoot        = s"http://localhost:${readPort()}/$contentDirName/"
     val contentDir     = s"$snowpackMountDir/$contentDirName"
 
     new SeleniumJSEnv(
