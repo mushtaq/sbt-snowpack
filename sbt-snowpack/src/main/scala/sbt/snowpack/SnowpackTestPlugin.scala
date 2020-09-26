@@ -13,38 +13,56 @@ object SnowpackTestPlugin extends AutoPlugin {
   override val requires: Plugins = plugins.JvmPlugin && ScalaJSPlugin
 
   object autoImport {
-    lazy val snowpackTestServer         = settingKey[SnowpackTestServer]("process handle of the test server")
-    lazy val startSnowpackTestServer    = taskKey[Unit]("start snowpack test server")
-    lazy val stopSnowpackTestServer     = taskKey[Unit]("stop snowpack test server")
-    lazy val reStartSnowpackTestServer  = taskKey[Unit]("restart snowpack test server")
-    lazy val generateSnowpackTestConfig = taskKey[Path]("generate snowpack test config")
+    lazy val snowpackServer         = settingKey[SnowpackServer]("process handle of the test server")
+    lazy val startSnowpackServer    = taskKey[Unit]("start snowpack test server")
+    lazy val stopSnowpackServer     = taskKey[Unit]("stop snowpack test server")
+    lazy val reStartSnowpackServer  = taskKey[Unit]("restart snowpack test server")
+    lazy val generateSnowpackConfig = taskKey[Path]("generate snowpack test config")
   }
 
   import autoImport._
 
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
-    snowpackTestServer := new SnowpackTestServer(baseDirectory.value, crossTarget.value, name.value),
-    startSnowpackTestServer := {
-      val _ = (Test / fastOptJS).value
-      snowpackTestServer.value.start()
-    },
-    stopSnowpackTestServer := snowpackTestServer.value.stop(),
-    reStartSnowpackTestServer := {
-      val _ = stopSnowpackTestServer.value
-      startSnowpackTestServer.value
-    },
-    generateSnowpackTestConfig := {
-      snowpackTestServer.value.generateTestConfig()
-      snowpackTestServer.value.configPath
-    },
-    jsEnv := snowpackTestServer.value.seleniumJsEnv,
-    fastOptJS / crossTarget := snowpackTestServer.value.snowpackMountDir.toFile,
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) },
-    Global / onLoad := {
-      (Global / onLoad).value.compose {
-        _.addExitHook(snowpackTestServer.value.stop())
+    Compile / snowpackServer := new SnowpackDevServer(
+      baseDirectory.value,
+      crossTarget.value,
+      name.value,
+      (LocalRootProject / baseDirectory).value
+    ),
+    Test / snowpackServer := new SnowpackTestServer(
+      baseDirectory.value,
+      crossTarget.value,
+      name.value
+    )
+  ) ++ inConfig(Compile)(commonSettings(Compile)) ++ inConfig(Test)(commonSettings(Test))
+
+  private def commonSettings(config: Configuration): Seq[Setting[_]] = {
+    val configSnowpackServer = config / snowpackServer
+    Seq(
+      startSnowpackServer := {
+        val _ = (config / fastOptJS).value
+        configSnowpackServer.value.start()
+      },
+      stopSnowpackServer := configSnowpackServer.value.stop(),
+      reStartSnowpackServer := {
+        val _ = stopSnowpackServer.value
+        startSnowpackServer.value
+      },
+      generateSnowpackConfig := {
+        configSnowpackServer.value.generateTestConfig()
+        configSnowpackServer.value.configPath
+      },
+      jsEnv := configSnowpackServer.value.seleniumJsEnv,
+      fastOptJS / crossTarget := configSnowpackServer.value.snowpackMountDir.toFile,
+      Global / onLoad := {
+        (Global / onLoad).value.compose {
+          _.addExitHook {
+            configSnowpackServer.value.stop()
+          }
+        }
       }
-    }
-  )
+    )
+  }
 }

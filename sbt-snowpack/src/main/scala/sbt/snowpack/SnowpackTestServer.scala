@@ -10,7 +10,8 @@ import ujson.Obj
 
 import scala.util.control.NonFatal
 
-class SnowpackTestServer(baseDir: File, crossTarget: File, projectName: String) extends SnowpackServer(baseDir, crossTarget, "test") {
+class SnowpackTestServer(projectBaseDir: File, crossTarget: File, projectName: String)
+    extends SnowpackServer(projectBaseDir, crossTarget, "test") {
   protected def baseJson(port: Int): Obj =
     ujson.Obj(
       "mount"      -> ujson.Obj(
@@ -25,7 +26,30 @@ class SnowpackTestServer(baseDir: File, crossTarget: File, projectName: String) 
     )
 }
 
-abstract class SnowpackServer(baseDir: File, crossTarget: File, configName: String) {
+class SnowpackDevServer(projectBaseDir: File, crossTarget: File, projectName: String, rootBaseDir: File)
+    extends SnowpackServer(projectBaseDir, crossTarget, "dev") {
+  protected def baseJson(port: Int): Obj =
+    ujson.Obj(
+      "mount"      -> ujson.Obj(
+        "public"                  -> "/",
+        snowpackMountDir.toString -> "/_dist_"
+      ),
+      "devOptions" -> ujson.Obj(
+        "port" -> port
+      ),
+      "plugins"    -> ujson.Arr(
+        ujson.Arr(
+          "@snowpack/plugin-run-script",
+          ujson.Obj(
+            "cmd"   -> s"set -x; cd $rootBaseDir; sbtn $projectName/fastOptJS; cd -",
+            "watch" -> s"set -x; cd $rootBaseDir; sbtn ~$projectName/fastOptJS; cd -"
+          )
+        )
+      )
+    )
+}
+
+abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configName: String) {
   protected def baseJson(port: Int): Obj
 
   @volatile
@@ -38,7 +62,7 @@ abstract class SnowpackServer(baseDir: File, crossTarget: File, configName: Stri
 
   private val startCommand    = List("npx", "snowpack", "dev", "--config", configPath.toString, "--reload")
   private val startCommandStr = startCommand.mkString(" ")
-  private val userConfigPath  = baseDir.toPath.resolve(configFileName)
+  private val userConfigPath  = projectBaseDir.toPath.resolve(configFileName)
 
   def readPort(): Int = {
     try {
@@ -55,7 +79,7 @@ abstract class SnowpackServer(baseDir: File, crossTarget: File, configName: Stri
       if (userConfigPath.toFile.exists()) ujson.Obj(extendsClause.obj ++= baseJson(port).obj)
       else baseJson(port)
     }
-    ujson.write(json)
+    ujson.write(json, indent = 2)
   }
 
   def generateTestConfig(): Int =
@@ -72,7 +96,7 @@ abstract class SnowpackServer(baseDir: File, crossTarget: File, configName: Stri
     synchronized {
       val port           = generateTestConfig()
       val processBuilder = new ProcessBuilder(startCommand: _*)
-        .directory(baseDir)
+        .directory(projectBaseDir)
         .redirectError(Redirect.INHERIT)
 
       process match {
