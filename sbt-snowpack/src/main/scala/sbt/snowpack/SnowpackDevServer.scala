@@ -21,8 +21,8 @@ class SnowpackDevServer(projectBaseDir: File, crossTarget: File, projectName: St
   protected def baseJson: JsObject = {
     Json.obj(
       "mount" -> Json.obj(
-        "public"                  -> "/",
-        snowpackMountDir.toString -> "/_dist_"
+        "public"             -> "/",
+        crossTarget.toString -> "/_dist_"
       )
     )
   }

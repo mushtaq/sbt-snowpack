@@ -17,8 +17,7 @@ abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configNam
   sys.addShutdownHook(process.foreach(_.destroy()))
 
   private val configFileName   = s"snowpack.${configName}.config.json"
-  val snowpackMountDir: Path   = crossTarget.toPath.resolve("snowpack").resolve(configName)
-  private val configPath: Path = snowpackMountDir.resolve(configFileName)
+  private val configPath: Path = crossTarget.toPath.resolve(configFileName)
 
   private val startCommand    = List("npx", "snowpack", "dev", "--config", configPath.toString, "--reload")
   private val startCommandStr = startCommand.mkString(" ")
@@ -47,7 +46,7 @@ abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configNam
 
   def generateTestConfig(): Path =
     synchronized {
-      Files.createDirectories(snowpackMountDir)
+      Files.createDirectories(crossTarget.toPath)
       Files.write(configPath, Json.prettyPrint(configJson()).getBytes())
       println(s"generated $configName config file, run using command:")
       println(startCommandStr)
@@ -86,7 +85,7 @@ abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configNam
   def seleniumJsEnv: SeleniumJSEnv = {
     val contentDirName = "selenium"
     val webRoot        = s"http://localhost:${readPort()}/$contentDirName/"
-    val contentDir     = s"$snowpackMountDir/$contentDirName"
+    val contentDir     = s"$crossTarget/$contentDirName"
 
     new SeleniumJSEnv(
       new ChromeOptions().setHeadless(true),

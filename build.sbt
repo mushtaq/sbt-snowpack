@@ -79,12 +79,12 @@ lazy val `example` = project
       //      "-Xasync" does not work with Scala.js js yet
     ),
     Test / test := {
-      (Test / reStartSnowpackServer).value
+      reStartSnowpackServer.dependsOn((Test / fastOptJS)).value
       (Test / test).value
       (Test / testHtml).value
     },
     Compile / run := {
-      (Compile / reStartSnowpackServer).value
+      reStartSnowpackServer.dependsOn((Compile / fastOptJS)).value
       (Compile / run).toTask("").value
     }
   )

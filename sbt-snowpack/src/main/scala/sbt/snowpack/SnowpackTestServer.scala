@@ -12,7 +12,7 @@ class SnowpackTestServer(projectBaseDir: File, crossTarget: File, projectName: S
   protected def baseJson: JsObject =
     Json.obj(
       "mount"      -> Json.obj(
-        snowpackMountDir.toString                      -> "/",
+        crossTarget.toString                           -> "/",
         s"$crossTarget/$projectName-fastopt-test-html" -> "/testHtml"
       ),
       "devOptions" -> Json.obj(
