@@ -17,7 +17,7 @@ object SnowpackPlugin extends AutoPlugin {
     lazy val startSnowpackServer            = taskKey[Unit]("start snowpack server")
     lazy val stopSnowpackServer             = taskKey[Unit]("stop snowpack server")
     lazy val reStartSnowpackServer          = taskKey[Unit]("restart snowpack server")
-    lazy val generateSnowpackConfig         = taskKey[Path]("generate snowpack config for startSnowpackServer task")
+    lazy val generateInternalSnowpackConfig = taskKey[Path]("generate snowpack config for startSnowpackServer task")
     lazy val generateExternalSnowpackConfig = taskKey[Path]("generate snowpack config for npm start command")
   }
 
@@ -27,7 +27,7 @@ object SnowpackPlugin extends AutoPlugin {
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) },
     snowpackServer := new SnowpackServer(
-      new SnowpackTestConfig(
+      new SnowpackInternalConfig(
         baseDirectory.value,
         crossTarget.value,
         name.value
@@ -36,7 +36,7 @@ object SnowpackPlugin extends AutoPlugin {
     stopSnowpackServer := snowpackServer.value.stop(),
     generateExternalSnowpackConfig := {
       (Compile / fastOptJS).value
-      new SnowpackDevConfig(
+      new SnowpackExternalConfig(
         baseDirectory.value,
         crossTarget.value,
         name.value,
@@ -55,12 +55,12 @@ object SnowpackPlugin extends AutoPlugin {
 
   def configSpecificSettings(configuration: Configuration) =
     Seq(
-      configuration / generateSnowpackConfig := {
+      configuration / generateInternalSnowpackConfig := {
         (configuration / fastOptJS).value
         snowpackServer.value.snowpackConfig.generateTestConfig()
       },
       configuration / startSnowpackServer := {
-        (configuration / generateSnowpackConfig).value
+        (configuration / generateInternalSnowpackConfig).value
         snowpackServer.value.start()
       },
       configuration / reStartSnowpackServer := {

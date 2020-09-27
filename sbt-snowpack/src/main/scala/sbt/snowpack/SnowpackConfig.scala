@@ -49,8 +49,12 @@ trait SnowpackConfig {
     }
 }
 
-class SnowpackTestConfig(val projectBaseDir: File, val crossTarget: File, val projectName: String) extends SnowpackConfig {
-  override def configName: String = "test"
+class SnowpackInternalConfig(
+    val projectBaseDir: File,
+    val crossTarget: File,
+    val projectName: String
+) extends SnowpackConfig {
+  override def configName: String = "internal"
 
   override protected def pluginJson: List[JsArray] = Nil
 
@@ -67,10 +71,14 @@ class SnowpackTestConfig(val projectBaseDir: File, val crossTarget: File, val pr
     )
 }
 
-class SnowpackDevConfig(val projectBaseDir: File, val crossTarget: File, val projectName: String, val rootBaseDir: File)
-    extends SnowpackConfig {
+class SnowpackExternalConfig(
+    val projectBaseDir: File,
+    val crossTarget: File,
+    val projectName: String,
+    val rootBaseDir: File
+) extends SnowpackConfig {
 
-  override def configName: String = "dev"
+  override def configName: String = "external"
 
   protected def pluginJson: List[JsArray] =
     List(
