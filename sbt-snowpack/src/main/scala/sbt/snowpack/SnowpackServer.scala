@@ -55,7 +55,6 @@ abstract class SnowpackServer(projectBaseDir: File, crossTarget: File, configNam
 
   def start(): Unit =
     synchronized {
-      generateTestConfig()
       val port           = readPort()
       val processBuilder = new ProcessBuilder(startCommand: _*)
         .directory(projectBaseDir)
