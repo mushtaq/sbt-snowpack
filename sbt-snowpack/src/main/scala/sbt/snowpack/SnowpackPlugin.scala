@@ -13,10 +13,10 @@ object SnowpackPlugin extends AutoPlugin {
   override val requires: Plugins = plugins.JvmPlugin && ScalaJSPlugin
 
   object autoImport {
-    lazy val snowpackServer            = settingKey[SnowpackServer]("process handle of the test server")
-    lazy val startSnowpackServer       = taskKey[Unit]("start snowpack test server")
-    lazy val stopSnowpackServer        = taskKey[Unit]("stop snowpack test server")
-    lazy val reStartSnowpackServer     = taskKey[Unit]("restart snowpack test server")
+    lazy val snowpackServer            = settingKey[SnowpackServer]("process handle of the server")
+    lazy val startSnowpackServer       = taskKey[Unit]("start snowpack server")
+    lazy val stopSnowpackServer        = taskKey[Unit]("stop snowpack server")
+    lazy val reStartSnowpackServer     = taskKey[Unit]("restart snowpack server")
     lazy val generateSnowpackConfig    = taskKey[Path]("generate snowpack test config")
     lazy val generateSnowpackDevConfig = taskKey[Path]("generate snowpack dev config")
   }
@@ -26,15 +26,17 @@ object SnowpackPlugin extends AutoPlugin {
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) },
-    snowpackServer := new SnowpackTestServer(
-      baseDirectory.value,
-      crossTarget.value,
-      name.value
+    snowpackServer := new SnowpackServer(
+      new SnowpackTestConfig(
+        baseDirectory.value,
+        crossTarget.value,
+        name.value
+      )
     ),
     stopSnowpackServer := snowpackServer.value.stop(),
     generateSnowpackDevConfig := {
       (Compile / fastOptJS).value
-      new SnowpackDevServer(
+      new SnowpackDevConfig(
         baseDirectory.value,
         crossTarget.value,
         name.value,
@@ -55,7 +57,7 @@ object SnowpackPlugin extends AutoPlugin {
     Seq(
       configuration / generateSnowpackConfig := {
         (configuration / fastOptJS).value
-        snowpackServer.value.generateTestConfig()
+        snowpackServer.value.snowpackConfig.generateTestConfig()
       },
       configuration / startSnowpackServer := {
         (configuration / generateSnowpackConfig).value
