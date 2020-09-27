@@ -13,12 +13,12 @@ object SnowpackPlugin extends AutoPlugin {
   override val requires: Plugins = plugins.JvmPlugin && ScalaJSPlugin
 
   object autoImport {
-    lazy val snowpackServer            = settingKey[SnowpackServer]("process handle of the server")
-    lazy val startSnowpackServer       = taskKey[Unit]("start snowpack server")
-    lazy val stopSnowpackServer        = taskKey[Unit]("stop snowpack server")
-    lazy val reStartSnowpackServer     = taskKey[Unit]("restart snowpack server")
-    lazy val generateSnowpackConfig    = taskKey[Path]("generate snowpack test config")
-    lazy val generateSnowpackDevConfig = taskKey[Path]("generate snowpack dev config")
+    lazy val snowpackServer                 = settingKey[SnowpackServer]("process handle of the server")
+    lazy val startSnowpackServer            = taskKey[Unit]("start snowpack server")
+    lazy val stopSnowpackServer             = taskKey[Unit]("stop snowpack server")
+    lazy val reStartSnowpackServer          = taskKey[Unit]("restart snowpack server")
+    lazy val generateSnowpackConfig         = taskKey[Path]("generate snowpack config for startSnowpackServer task")
+    lazy val generateExternalSnowpackConfig = taskKey[Path]("generate snowpack config for npm start command")
   }
 
   import autoImport._
@@ -34,7 +34,7 @@ object SnowpackPlugin extends AutoPlugin {
       )
     ),
     stopSnowpackServer := snowpackServer.value.stop(),
-    generateSnowpackDevConfig := {
+    generateExternalSnowpackConfig := {
       (Compile / fastOptJS).value
       new SnowpackDevConfig(
         baseDirectory.value,
