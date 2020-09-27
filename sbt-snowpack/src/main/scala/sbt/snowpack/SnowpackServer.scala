@@ -43,16 +43,12 @@ class SnowpackServer(val snowpackConfig: SnowpackConfig) {
       process = None
     }
 
-  def seleniumJsEnv: SeleniumJSEnv = {
+  def seleniumConfig: SeleniumJSEnv.Config = {
     val contentDirName = "selenium"
     val webRoot        = s"http://localhost:${readPort()}/$contentDirName/"
     val contentDir     = s"${snowpackConfig.crossTarget}/$contentDirName"
-
-    new SeleniumJSEnv(
-      new ChromeOptions().setHeadless(true),
-      SeleniumJSEnv
-        .Config()
-        .withMaterializeInServer(contentDir, webRoot)
-    )
+    SeleniumJSEnv
+      .Config()
+      .withMaterializeInServer(contentDir, webRoot)
   }
 }

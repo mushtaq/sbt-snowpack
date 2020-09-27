@@ -2,6 +2,8 @@ package sbt.snowpack
 
 import java.nio.file.Path
 
+import org.openqa.selenium.chrome.ChromeOptions
+import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
@@ -43,7 +45,12 @@ object SnowpackPlugin extends AutoPlugin {
         (LocalRootProject / baseDirectory).value
       ).generateTestConfig()
     },
-    jsEnv := snowpackServer.value.seleniumJsEnv,
+    jsEnv := {
+      new SeleniumJSEnv(
+        new ChromeOptions().setHeadless(true),
+        snowpackServer.value.seleniumConfig
+      )
+    },
     Global / onLoad := {
       (Global / onLoad).value.compose {
         _.addExitHook {
