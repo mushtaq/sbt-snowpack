@@ -1,13 +1,14 @@
 addSbtPlugin("com.timushev.sbt" % "sbt-updates"  % "0.5.1")
 addSbtPlugin("org.scalameta"    % "sbt-scalafmt" % "2.4.2")
 addSbtPlugin("com.timushev.sbt" % "sbt-rewarn"   % "0.1.1")
-addSbtPlugin("org.scala-js"     % "sbt-scalajs"  % "1.2.0")
 
 libraryDependencies += "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value
 
-resolvers += "jitpack" at "https://jitpack.io"
-libraryDependencies += "com.github.mushtaq.scala-js-env-selenium" %% "scalajs-env-selenium" % "5374c6b"
-libraryDependencies += "com.typesafe.play"                        %% "play-json"            % "2.9.1"
+libraryDependencies += "com.typesafe.play" %% "play-json"            % "2.9.1"
+libraryDependencies += "org.scala-js"      %% "scalajs-env-selenium" % "1.1.0"
+// note, 'sbt-scalajs' must come after 'scalajs-env-selenium'
+// reference: https://github.com/scala-js/scala-js-env-selenium#usage
+addSbtPlugin("org.scala-js"                 % "sbt-scalajs"          % "1.2.0")
 
 scalacOptions ++= Seq(
   "-encoding",
