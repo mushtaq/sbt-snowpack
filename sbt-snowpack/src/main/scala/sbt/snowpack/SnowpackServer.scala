@@ -2,7 +2,6 @@ package sbt.snowpack
 
 import java.lang.ProcessBuilder.Redirect
 
-import org.openqa.selenium.chrome.ChromeOptions
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 class SnowpackServer(val snowpackConfig: SnowpackConfig) {
