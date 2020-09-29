@@ -1,6 +1,10 @@
-> startSnowpackTestServer
-> stopSnowpackTestServer
-> startSnowpackTestServer
-> startSnowpackTestServer
-> stopSnowpackTestServer
-> stopSnowpackTestServer
+> startSnowpackServer
+> stopSnowpackServer
+> startSnowpackServer
+> startSnowpackServer
+> stopSnowpackServer
+> stopSnowpackServer
+> reStartSnowpackServer
+> reStartSnowpackServer
+> generateInternalSnowpackConfig
+> generateExternalSnowpackConfig

@@ -29,7 +29,7 @@ lazy val `sbt-snowpack-root` = project
   .aggregate(`sbt-snowpack`, `example`)
 
 lazy val `sbt-snowpack` = project
-  .enablePlugins(ScriptedPlugin)
+  .enablePlugins(SbtPlugin)
   .settings(
     scalaVersion := "2.12.12",
     scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
@@ -38,7 +38,6 @@ lazy val `sbt-snowpack` = project
       list.filter(a => Seq("-Xmx", "-Xms", "-XX", "-Dsbt.log.noformat").exists(a.startsWith))
     },
     scriptedBufferLog := false,
-    sbtPlugin := true,
     publishMavenStyle := true,
     resolvers += localMavenResolverForSbtPlugins,
     publishM2Configuration := publishM2Configuration.value.withResolverName(localMavenResolverForSbtPlugins.name),
