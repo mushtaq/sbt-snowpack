@@ -1,6 +1,7 @@
 package sbt.snowpack
 
 import java.lang.ProcessBuilder.Redirect
+import java.nio.file.Files
 
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
@@ -8,6 +9,7 @@ class SnowpackServer(val snowpackConfig: SnowpackConfig) {
   @volatile
   private var process: Option[Process] = None
   sys.addShutdownHook(process.foreach(_.destroy()))
+  private val logFile                  = snowpackConfig.crossTarget.toPath.resolve("snowpack.log")
 
   private def readPort(): Int = {
     val lookupResult = snowpackConfig.configJson() \ "devOptions" \ "port"
@@ -16,10 +18,15 @@ class SnowpackServer(val snowpackConfig: SnowpackConfig) {
 
   def start(): Unit =
     synchronized {
-      val port           = readPort()
-      val processBuilder = new ProcessBuilder(snowpackConfig.startCommand: _*)
-        .directory(snowpackConfig.projectBaseDir)
-        .redirectError(Redirect.INHERIT)
+      val processBuilder = {
+        val builder = new ProcessBuilder(snowpackConfig.startCommand: _*).directory(snowpackConfig.projectBaseDir)
+        if (!logFile.toFile.exists()) {
+          Files.createFile(logFile)
+        }
+        builder.redirectError(Redirect.INHERIT).redirectOutput(logFile.toFile)
+      }
+
+      val port = readPort()
 
       process match {
         case Some(value) =>

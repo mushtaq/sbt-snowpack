@@ -27,16 +27,17 @@ trait SnowpackConfig {
   }
 
   def configJson(): JsObject = {
-    val userJson    = readUserConfig()
-    val userPlugins = (userJson \ "plugins").asOpt[List[JsArray]].getOrElse(Nil)
-    val userExtends = (userJson \ "extends").asOpt[String]
-    val extendsJson = userExtends
+    val userJson       = readUserConfig()
+    val userExtends    = (userJson \ "extends").asOpt[String]
+    val extendsJson    = userExtends
       .map(x => projectBaseDir.toPath.resolve(Path.of(x)))
-      .map(x => Json.obj("extends" -> x.toString))
+      .map(x => Json.parse(Files.readString(x)).as[JsObject])
       .getOrElse(Json.obj())
+    val mergedUserJson = extendsJson.deepMerge(userJson) - "extends"
 
-    val allPlugins = Json.obj("plugins" -> (pluginJson ::: userPlugins))
-    baseJson.deepMerge(userJson) ++ extendsJson ++ allPlugins
+    val userPlugins = (mergedUserJson \ "plugins").asOpt[List[JsArray]].getOrElse(Nil)
+    val allPlugins  = Json.obj("plugins" -> (pluginJson ::: userPlugins))
+    baseJson.deepMerge(mergedUserJson) ++ allPlugins
   }
 
   def generateTestConfig(): Path =
