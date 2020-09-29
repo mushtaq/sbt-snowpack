@@ -37,7 +37,7 @@ object SnowpackPlugin extends AutoPlugin {
     ),
     stopSnowpackServer := snowpackServer.value.stop(),
     generateExternalSnowpackConfig := {
-      (Compile / fastOptJS).value
+      val a = (Compile / fastOptJS).value
       new SnowpackExternalConfig(
         baseDirectory.value,
         crossTarget.value,
@@ -63,11 +63,11 @@ object SnowpackPlugin extends AutoPlugin {
   def configSpecificSettings(configuration: Configuration) =
     Seq(
       configuration / generateInternalSnowpackConfig := {
-        (configuration / fastOptJS).value
+        val a = (configuration / fastOptJS).value
         snowpackServer.value.snowpackConfig.generateTestConfig()
       },
       configuration / startSnowpackServer := {
-        (configuration / generateInternalSnowpackConfig).value
+        val a = (configuration / generateInternalSnowpackConfig).value
         snowpackServer.value.start()
       },
       configuration / reStartSnowpackServer := {

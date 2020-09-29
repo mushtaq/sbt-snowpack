@@ -1,4 +1,6 @@
 import Libs._
+import sbt.io.Path.userHome
+import sbt.librarymanagement.Patterns
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
@@ -31,15 +33,15 @@ lazy val `sbt-snowpack` = project
     scriptedBufferLog := false,
     sbtPlugin := true,
     publishMavenStyle := true,
-    publishM2 := {
-      val _                = publishM2.value
-      val orgPath          = organization.value.replace(".", "/")
-      val basePath         = s".m2/repository/$orgPath/${name.value}"
-      val originalLocation = file(sys.env("HOME")) / s"${basePath}_${scalaBinaryVersion.value}_${sbtBinaryVersion.value}"
-      val newLocation      = file(sys.env("HOME")) / s"$basePath"
-      println(s"originalLocation ----------> $originalLocation")
-      println(s"newLocation      ----------> $newLocation")
-      originalLocation.renameTo(newLocation)
+    resolvers += {
+      val mavenPatternForSbtPlugins =
+        "[organisation]/[module](_[scalaVersion])(_[sbtVersion])/[revision]/[module](_[scalaVersion])(_[sbtVersion])-[revision](-[classifier]).[ext]"
+      Resolver.file("local-maven-for-sbt-plugins", userHome / ".m2" / "repository")(
+        Patterns().withArtifactPatterns(Vector(mavenPatternForSbtPlugins))
+      )
+    },
+    publishM2Configuration := {
+      publishM2Configuration.value.withResolverName("local-maven-for-sbt-plugins")
     },
     scalacOptions ++= Seq(
       "-encoding",
