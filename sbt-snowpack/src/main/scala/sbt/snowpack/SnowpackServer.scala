@@ -20,9 +20,8 @@ class SnowpackServer(val snowpackConfig: SnowpackConfig) {
     synchronized {
       val processBuilder = {
         val builder = new ProcessBuilder(snowpackConfig.startCommand: _*).directory(snowpackConfig.projectBaseDir)
-        if (!logFile.toFile.exists()) {
-          Files.createFile(logFile)
-        }
+        Files.deleteIfExists(logFile)
+        Files.createFile(logFile)
         builder.redirectError(Redirect.INHERIT).redirectOutput(logFile.toFile)
       }
 
