@@ -4,11 +4,12 @@ import sbt.librarymanagement.Patterns
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-lazy val localMavenResolverForSbtPlugins = {
-  val mavenPatternForSbtPlugins = "[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"
-  Resolver.file("local-maven-for-sbt-plugins", userHome / ".m2" / "repository")(
-    Patterns().withArtifactPatterns(Vector(mavenPatternForSbtPlugins))
-  )
+lazy val LocalMavenResolverForSbtPlugins = {
+  // remove scala and sbt versions from the path, as it does not work with jitpack
+  val pattern  = "[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"
+  val name     = "local-maven-for-sbt-plugins"
+  val location = userHome / ".m2" / "repository"
+  Resolver.file(name, location)(Patterns().withArtifactPatterns(Vector(pattern)))
 }
 
 inThisBuild(
@@ -39,8 +40,8 @@ lazy val `sbt-snowpack` = project
     },
     scriptedBufferLog := false,
     publishMavenStyle := true,
-    resolvers += localMavenResolverForSbtPlugins,
-    publishM2Configuration := publishM2Configuration.value.withResolverName(localMavenResolverForSbtPlugins.name),
+    resolvers += LocalMavenResolverForSbtPlugins,
+    publishM2Configuration := publishM2Configuration.value.withResolverName(LocalMavenResolverForSbtPlugins.name),
     scalacOptions ++= Seq(
       "-encoding",
       "UTF-8",
@@ -51,6 +52,9 @@ lazy val `sbt-snowpack` = project
       "-Ywarn-dead-code",
       "-Xfuture"
     ),
+    // below settings are duplicated in both build.sbt and plugins.sbt
+    // this is due to recursive source dependency in plugins.sbt via 'unmanagedSourceDirectories'
+    // recursion is *very* convenient as it allows a test example and plugin itself to exist in the same repo
     libraryDependencies += "com.typesafe.play" %% "play-json"            % "2.9.1",
     libraryDependencies += "org.scala-js"      %% "scalajs-env-selenium" % "1.1.0",
     // note, 'sbt-scalajs' must come after 'scalajs-env-selenium'
