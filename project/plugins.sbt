@@ -1,6 +1,6 @@
 addSbtPlugin("com.timushev.sbt" % "sbt-updates"  % "0.5.1")
 addSbtPlugin("org.scalameta"    % "sbt-scalafmt" % "2.4.2")
-addSbtPlugin("com.timushev.sbt" % "sbt-rewarn"   % "0.1.1")
+addSbtPlugin("com.timushev.sbt" % "sbt-rewarn"   % "0.1.2")
 
 libraryDependencies += "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value
 
@@ -31,4 +31,4 @@ libraryDependencies += "com.typesafe.play" %% "play-json"            % "2.9.1"
 libraryDependencies += "org.scala-js"      %% "scalajs-env-selenium" % "1.1.0"
 // note, 'sbt-scalajs' must come after 'scalajs-env-selenium'
 // reference: https://github.com/scala-js/scala-js-env-selenium#usage
-addSbtPlugin("org.scala-js"                 % "sbt-scalajs"          % "1.2.0")
+addSbtPlugin("org.scala-js"                 % "sbt-scalajs"          % "1.3.0")

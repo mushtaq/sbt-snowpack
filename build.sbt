@@ -59,7 +59,7 @@ lazy val `sbt-snowpack` = project
     libraryDependencies += "org.scala-js"      %% "scalajs-env-selenium" % "1.1.0",
     // note, 'sbt-scalajs' must come after 'scalajs-env-selenium'
     // reference: https://github.com/scala-js/scala-js-env-selenium#usage
-    addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.2.0")
+    addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.3.0")
   )
 
 lazy val `example` = project
@@ -85,12 +85,13 @@ lazy val `example` = project
       //      "-Xasync" does not work with Scala.js js yet
     ),
     Test / test := {
-      val ()  = (Test / reStartSnowpackServer).value
-      val ()  = (Test / test).value
-      val (_) = (Test / testHtml).value
+      (Test / reStartSnowpackServer).value
+      (Test / test).value
+      (Test / testHtml).value
+      ()
     },
     Compile / run := {
-      val () = (Compile / reStartSnowpackServer).value
-      val () = (Compile / run).toTask("").value
+      (Compile / reStartSnowpackServer).value
+      (Compile / run).toTask("").value
     }
   )
