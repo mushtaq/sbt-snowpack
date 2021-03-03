@@ -83,15 +83,5 @@ lazy val `example` = project
       "-Xsource:3",
       "-Xcheckinit"
       //      "-Xasync" does not work with Scala.js js yet
-    ),
-    Test / test := {
-      (Test / reStartSnowpackServer).value
-      (Test / test).value
-      (Test / testHtml).value
-      ()
-    },
-    Compile / run := {
-      (Compile / reStartSnowpackServer).value
-      (Compile / run).toTask("").value
-    }
+    )
   )
