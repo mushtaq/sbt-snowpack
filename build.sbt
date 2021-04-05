@@ -32,7 +32,7 @@ lazy val `sbt-snowpack-root` = project
 lazy val `sbt-snowpack` = project
   .enablePlugins(SbtPlugin)
   .settings(
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.12.13",
     scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
     scriptedLaunchOpts ++= {
       val list = java.lang.management.ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.toList
@@ -55,11 +55,11 @@ lazy val `sbt-snowpack` = project
     // below settings are duplicated in both build.sbt and plugins.sbt
     // this is due to recursive source dependency in plugins.sbt via 'unmanagedSourceDirectories'
     // recursion is *very* convenient as it allows a test example and plugin itself to exist in the same repo
-    libraryDependencies += "com.typesafe.play" %% "play-json"            % "2.9.1",
+    libraryDependencies += "com.typesafe.play" %% "play-json"            % "2.9.2",
     libraryDependencies += "org.scala-js"      %% "scalajs-env-selenium" % "1.1.0",
     // note, 'sbt-scalajs' must come after 'scalajs-env-selenium'
     // reference: https://github.com/scala-js/scala-js-env-selenium#usage
-    addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.3.0")
+    addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.5.1")
   )
 
 lazy val `example` = project
@@ -70,7 +70,7 @@ lazy val `example` = project
       `scala-async`,
       ScalablyTyped.R.rxjs
     ),
-    scalaVersion := "2.13.3",
+    scalaVersion := "2.13.5",
     scalacOptions ++= Seq(
       "-encoding",
       "UTF-8",
