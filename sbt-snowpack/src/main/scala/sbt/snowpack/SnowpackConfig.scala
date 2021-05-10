@@ -95,8 +95,8 @@ class SnowpackExternalConfig(
   protected def baseJson: JsObject = {
     Json.obj(
       "mount" -> Json.obj(
-        "public"             -> "/",
-        crossTarget.toString -> "/_dist_"
+        projectBaseDir.toPath.resolve("public").toString -> "/",
+        crossTarget.toString                             -> "/dist"
       )
     )
   }
