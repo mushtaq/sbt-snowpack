@@ -1,0 +1,18 @@
+{
+  "devOptions": {
+    "port": 8081
+  },
+  "mount": {
+    "public": "/",
+    "target/scala-2.13": "/dist"
+  },
+  "plugins": [
+    [
+      "@snowpack/plugin-run-script",
+      {
+        "cmd": "set -x; cd /Users/mushtaqahmed/projects/scala/sbt-snowpack; sbtn example/fastOptJS; cd -",
+        "watch": "set -x; cd /Users/mushtaqahmed/projects/scala/sbt-snowpack; sbtn ~example/fastOptJS; cd -"
+      }
+    ]
+  ]
+}

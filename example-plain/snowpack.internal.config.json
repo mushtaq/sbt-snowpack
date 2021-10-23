@@ -1,0 +1,11 @@
+{
+  "devOptions" : {
+    "port" : 9091,
+    "hmr" : false,
+    "open" : "none"
+  },
+  "mount" : {
+    "/Users/mushtaqahmed/projects/scala/sbt-snowpack/example-plain/target/scala-2.13" : "/"
+  },
+  "plugins" : [ ]
+}
