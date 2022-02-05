@@ -28,15 +28,15 @@ object SnowpackPlugin extends AutoPlugin {
   override lazy val projectSettings: Seq[Setting[_]] = Seq(
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) },
-    snowpackServer := new SnowpackServer(
+    snowpackServer                  := new SnowpackServer(
       new SnowpackInternalConfig(
         baseDirectory.value,
         crossTarget.value,
         name.value
       )
     ),
-    stopSnowpackServer := snowpackServer.value.stop(),
-    generateExternalSnowpackConfig := {
+    stopSnowpackServer              := snowpackServer.value.stop(),
+    generateExternalSnowpackConfig  := {
       (Compile / fastOptJS).value
       new SnowpackExternalConfig(
         baseDirectory.value,
@@ -45,13 +45,13 @@ object SnowpackPlugin extends AutoPlugin {
         (LocalRootProject / baseDirectory).value
       ).generateTestConfig()
     },
-    jsEnv := {
+    jsEnv                           := {
       new SeleniumJSEnv(
         new ChromeOptions().setHeadless(true),
         snowpackServer.value.seleniumConfig
       )
     },
-    Global / onLoad := {
+    Global / onLoad                 := {
       (Global / onLoad).value.compose {
         _.addExitHook {
           snowpackServer.value.stop()
@@ -66,11 +66,11 @@ object SnowpackPlugin extends AutoPlugin {
         (configuration / fastOptJS).value
         snowpackServer.value.snowpackConfig.generateTestConfig()
       },
-      configuration / startSnowpackServer := {
+      configuration / startSnowpackServer            := {
         (configuration / generateInternalSnowpackConfig).value
         snowpackServer.value.start()
       },
-      configuration / reStartSnowpackServer := {
+      configuration / reStartSnowpackServer          := {
         stopSnowpackServer.value
         (configuration / startSnowpackServer).value
       }

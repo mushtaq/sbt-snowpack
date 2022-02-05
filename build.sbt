@@ -4,6 +4,7 @@ import org.scalajs.jsenv.selenium.SeleniumJSEnv
 import sbt.io.Path.userHome
 import sbt.librarymanagement.Patterns
 
+import _root_.io.github.bonigarcia.wdm.WebDriverManager
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 lazy val LocalMavenResolverForSbtPlugins = {
@@ -89,7 +90,7 @@ lazy val `example` = project
     )
   )
 
-lazy val seleniumConfig: SeleniumJSEnv.Config = {
+def seleniumConfig2: SeleniumJSEnv.Config = {
   val contentDirName = "selenium"
   val webRoot        = s"http://localhost:9091/$contentDirName/"
   val contentDir     = s"/Users/mushtaqahmed/projects/scala/sbt-snowpack/example-plain/target/scala-2.13/$contentDirName"
@@ -106,6 +107,41 @@ lazy val `example-plain` = project
     Test / jsEnv                    := {
       new SeleniumJSEnv(
         new ChromeOptions().setHeadless(true),
+        seleniumConfig2
+      )
+    },
+    libraryDependencies ++= Seq(
+      scalatest.value % Test,
+      `scala-async`,
+      ScalablyTyped.R.rxjs
+    ),
+    scalaVersion                    := "2.13.5",
+    scalacOptions ++= Seq(
+      "-encoding",
+      "UTF-8",
+      "-feature",
+      "-unchecked",
+      "-deprecation",
+      "-Wconf:any:warning-verbose",
+      "-Wdead-code",
+      "-Xlint:_,-missing-interpolator",
+      "-Xsource:3",
+      "-Xasync",
+      "-Xcheckinit"
+      //      "-Xasync" does not work with Scala.js js yet
+    )
+  )
+
+lazy val `vite-project` = project
+  .enablePlugins(ScalaJSPlugin)
+  .settings(
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withSourceMap(false) },
+    jsEnv                           := {
+      new SeleniumJSEnv(
+        {
+          new ChromeOptions().setHeadless(true)
+        },
         seleniumConfig
       )
     },
@@ -130,3 +166,13 @@ lazy val `example-plain` = project
       //      "-Xasync" does not work with Scala.js js yet
     )
   )
+
+lazy val seleniumConfig: SeleniumJSEnv.Config = {
+//  WebDriverManager.chromedriver().setup()
+  val contentDirName = "vite-project-fastopt"
+  val webRoot        = s"http://localhost:3000/$contentDirName/"
+  val contentDir     = s"/Users/mushtaqahmed/projects/scala/sbt-snowpack/vite-project/target/scala-2.13/$contentDirName"
+  SeleniumJSEnv
+    .Config()
+    .withMaterializeInServer(contentDir, webRoot)
+}

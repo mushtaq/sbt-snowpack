@@ -1,0 +1,15 @@
+{
+  "name": "vite-project",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "set -x; cd ..; sbtn vite-project/fullLinkJS; cd -; vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "rxjs": "^7.4.0"
+  },
+  "devDependencies": {
+    "vite": "^2.6.4"
+  }
+}

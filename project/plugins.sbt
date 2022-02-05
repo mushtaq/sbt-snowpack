@@ -2,7 +2,8 @@ addSbtPlugin("com.timushev.sbt" % "sbt-updates"  % "0.6.0")
 addSbtPlugin("org.scalameta"    % "sbt-scalafmt" % "2.4.3")
 addSbtPlugin("com.timushev.sbt" % "sbt-rewarn"   % "0.1.3")
 
-libraryDependencies += "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value
+libraryDependencies += "org.scala-sbt"       %% "scripted-plugin"  % sbtVersion.value
+libraryDependencies += "io.github.bonigarcia" % "webdrivermanager" % "5.0.3"
 
 scalacOptions ++= Seq(
   "-encoding",
