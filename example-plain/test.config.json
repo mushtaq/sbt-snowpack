@@ -5,7 +5,7 @@
     "open" : "none"
   },
   "mount" : {
-    "/Users/mushtaqahmed/projects/scala/sbt-snowpack/example-plain/target/scala-2.13" : "/"
+    "target/scala-2.13" : "/"
   },
   "plugins" : [ ]
 }

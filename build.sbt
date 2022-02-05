@@ -90,10 +90,10 @@ lazy val `example` = project
     )
   )
 
-def seleniumConfig2: SeleniumJSEnv.Config = {
+def seleniumConfig2(base: String): SeleniumJSEnv.Config = {
   val contentDirName = "selenium"
   val webRoot        = s"http://localhost:9091/$contentDirName/"
-  val contentDir     = s"/Users/mushtaqahmed/projects/scala/sbt-snowpack/example-plain/target/scala-2.13/$contentDirName"
+  val contentDir     = s"$base/$contentDirName"
   SeleniumJSEnv
     .Config()
     .withMaterializeInServer(contentDir, webRoot)
@@ -107,7 +107,7 @@ lazy val `example-plain` = project
     Test / jsEnv                    := {
       new SeleniumJSEnv(
         new ChromeOptions().setHeadless(true),
-        seleniumConfig2
+        seleniumConfig2((Compile / classDirectory).value.getParent)
       )
     },
     libraryDependencies ++= Seq(

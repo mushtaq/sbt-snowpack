@@ -3,7 +3,7 @@ package example
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 
 class JsTest extends AsyncFreeSpec with Matchers {
 
@@ -16,9 +16,14 @@ class JsTest extends AsyncFreeSpec with Matchers {
     }
   }
 
-  "camelcase" in {
+  "camelcase" in Future.unit.flatMap { _ =>
     println("starting test *********************")
     Utils.camelcase("my name is blah") shouldBe "myNameIsBlah"
+    val p = Promise[Null]()
+    scala.scalajs.js.timers.setTimeout(1) {
+      p.success(null)
+    }
+    p.future
   }
 
 }
