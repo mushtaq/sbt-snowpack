@@ -108,7 +108,7 @@ lazy val `example-plain` = project
     Test / jsEnv                    := {
       new SeleniumJSEnv(
         new ChromeOptions().setHeadless(true),
-        seleniumConfig(9091, (Compile / classDirectory).value.getParent)
+        seleniumConfig(9091, crossTarget.value.getAbsolutePath)
       )
     },
     libraryDependencies ++= Seq(
@@ -141,7 +141,7 @@ lazy val `vite-project` = project
     Test / jsEnv                    := {
       new SeleniumJSEnv(
         new ChromeOptions().setHeadless(true),
-        seleniumConfig(3000, (Compile / baseDirectory).value.getAbsolutePath)
+        seleniumConfig(3000, baseDirectory.value.getAbsolutePath)
       )
     },
     libraryDependencies ++= Seq(

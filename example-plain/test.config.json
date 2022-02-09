@@ -6,6 +6,5 @@
   },
   "mount" : {
     "target/scala-2.13" : "/"
-  },
-  "plugins" : [ ]
+  }
 }

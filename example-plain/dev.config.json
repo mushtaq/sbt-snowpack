@@ -10,8 +10,8 @@
     [
       "@snowpack/plugin-run-script",
       {
-        "cmd": "set -x; cd /Users/mushtaqahmed/projects/scala/sbt-snowpack; sbtn example/fastOptJS; cd -",
-        "watch": "set -x; cd /Users/mushtaqahmed/projects/scala/sbt-snowpack; sbtn ~example/fastOptJS; cd -"
+        "cmd": "set -x; cd ..; sbtn example-plain/fastLinkJS; cd -",
+        "watch": "set -x; cd ..; sbtn ~example-plain/fastLinkJS; cd -"
       }
     ]
   ]
